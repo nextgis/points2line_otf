@@ -23,10 +23,10 @@
 """
 import numpy as np
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, QObject, SIGNAL, Qt
-from PyQt4.QtGui import QAction, QIcon, QMessageBox, QProgressBar, QApplication
+from PyQt4.QtGui import QAction, QIcon, QMessageBox
 # Import the code for the dialog
 import os.path
-from qgis.core import QgsVectorLayer, QGis, QgsGeometry, QgsFeature, QgsPoint
+from qgis.core import QgsVectorLayer, QGis, QgsGeometry, QgsFeature, QgsPoint, QgsApplication
 from qgis.gui import QgsMessageBar
 from .connector import SOM1d
 
@@ -265,20 +265,19 @@ class Points2LineOTF:
             QMessageBox.information(None, self.tr('Line can\'t be inserted'), self.tr('Buffer is empty!'))
             return
 
-        # TODO: create line
-        # progressMessageBar = self.iface.messageBar().createMessage("Doing something boring...")
-        # progress = QProgressBar()
-        # progress.setMaximum(progress.minimum())
-        # progress.setAlignment(Qt.AlignLeft|Qt.AlignVCenter)
-        # progressMessageBar.layout().addWidget(progress)
-        # self.iface.messageBar().pushWidget(progressMessageBar, self.iface.messageBar().INFO)
-        #self.iface.messageBar().clearWidgets()
+        #show message
+        self.iface.messageBar().clearWidgets()
         self.iface.messageBar().pushMessage(self.tr("Points2Line OTF"),
                                             self.tr("Processing points. Please wait..."),
                                             level=QgsMessageBar.INFO
                                             )
-        QApplication.processEvents()
+        QgsApplication.setOverrideCursor(Qt.WaitCursor)
+        QgsApplication.processEvents()
+        QgsApplication.processEvents()
+        QgsApplication.processEvents()
 
+
+        # Create line
 
         # QGS geoms to np
         points = []
@@ -301,12 +300,14 @@ class Points2LineOTF:
         # Insert feature
         feat = QgsFeature()
         feat.setGeometry(geom)
-        res = layer.dataProvider().addFeatures([feat])
+        layer.dataProvider().addFeatures([feat])
 
-        self.iface.mapCanvas().refresh()
-
+        #show message
+        QgsApplication.restoreOverrideCursor()
+        self.iface.messageBar().clearWidgets()
         self.iface.messageBar().pushMessage(self.tr("Points2Line OTF"),
                                             self.tr("One line was sucessful added"),
                                             level=QgsMessageBar.INFO,
                                             duration=5)
 
+        self.iface.mapCanvas().refresh()
