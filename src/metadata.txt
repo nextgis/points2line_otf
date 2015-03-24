@@ -29,7 +29,7 @@ homepage=
 tracker=
 repository=
 category=Vector
-icon=icon.png
+icon=save_line.png
 # experimental flag
 experimental=False
 

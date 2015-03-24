@@ -158,18 +158,19 @@ class Points2LineOTF:
 
     def initGui(self):
 
-        icon_path = os.path.join(CURR_PATH, 'icon.png')
+        icon_path_copy = os.path.join(CURR_PATH, 'copy_points.png')
+        icon_path_save = os.path.join(CURR_PATH, 'save_line.png')
 
         self._geom_buffer = None
 
         self.copy_action = self.add_action(
-            icon_path,
+            icon_path_copy,
             text=self.tr(u'Get points'),
             callback=self.copy_points,
             parent=self.iface.mainWindow())
 
         self.insert_action = self.add_action(
-            icon_path,
+            icon_path_save,
             text=self.tr(u'Insert line'),
             callback=self.insert_line,
             parent=self.iface.mainWindow())
@@ -276,38 +277,45 @@ class Points2LineOTF:
         QgsApplication.processEvents()
         QgsApplication.processEvents()
 
+        try:
+            # Create line
 
-        # Create line
+            # QGS geoms to np
+            points = []
+            for in_geom in self._geom_buffer:
+                points.append((in_geom.x(), in_geom.y()))
+            data = np.array(points)
+            # Make line
+            som = SOM1d(data)
+            result = som.connect()
 
-        # QGS geoms to np
-        points = []
-        for in_geom in self._geom_buffer:
-            points.append((in_geom.x(), in_geom.y()))
-        data = np.array(points)
-        # Make line
-        som = SOM1d(data)
-        result = som.connect()
+            #np to QGS
+            self._geom_buffer = []
+            for out_geom in result:
+                self._geom_buffer.append(QgsPoint(out_geom[0], out_geom[1]))
 
-        #np to QGS
-        self._geom_buffer = []
-        for out_geom in result:
-            self._geom_buffer.append(QgsPoint(out_geom[0], out_geom[1]))
+            geom = QgsGeometry.fromPolyline(self._geom_buffer)
 
-        geom = QgsGeometry.fromPolyline(self._geom_buffer)
+            # TODO: check crs?
 
-        # TODO: check crs?
+            # Insert feature
+            feat = QgsFeature()
+            feat.setGeometry(geom)
+            result = layer.dataProvider().addFeatures([feat])
 
-        # Insert feature
-        feat = QgsFeature()
-        feat.setGeometry(geom)
-        layer.dataProvider().addFeatures([feat])
+            #show message
+            self.iface.messageBar().clearWidgets()
+            if result:
+                self.iface.messageBar().pushMessage(self.tr("Points2Line OTF"),
+                                                self.tr("One line was sucesfull added"),
+                                                level=QgsMessageBar.INFO,
+                                                duration=5)
+            else:
+                self.iface.messageBar().pushMessage(self.tr("Points2Line OTF"),
+                                                self.tr("Line was not added"),
+                                                level=QgsMessageBar.CRITICAL,
+                                                duration=5)
 
-        #show message
-        QgsApplication.restoreOverrideCursor()
-        self.iface.messageBar().clearWidgets()
-        self.iface.messageBar().pushMessage(self.tr("Points2Line OTF"),
-                                            self.tr("One line was sucessful added"),
-                                            level=QgsMessageBar.INFO,
-                                            duration=5)
-
-        self.iface.mapCanvas().refresh()
+            self.iface.mapCanvas().refresh()
+        finally:
+            QgsApplication.restoreOverrideCursor()
