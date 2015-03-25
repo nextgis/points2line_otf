@@ -2,7 +2,7 @@
 
 import numpy as np
 
-EPSILON = 0.0001    # A small number
+EPSILON = 0.00001    # A small number
 
 class SOM1d():
     '''1-d self organizing map for 2-dimmential inputs
@@ -86,13 +86,15 @@ class SOM1d():
     def connect(self):
         # train SOM
         self.normalize()
-        self.train(self.size*50, lrate=0.95, sigma_init=self.size, circular=False)
+        self.train(self.size*100, lrate=0.99, sigma_init=self.size, circular=False)
         self.train(self.size*250, lrate=0.99, sigma_init=2, circular=False)
         self.denormalyze()
 
+        print self.w
+
         ordered = {}
         for point_id in range(len(self.z)):
-            bmu = self.BMU_idx(point_id)
+            bmu = self.BMU_idx(self.z[point_id])
             try:
                 ordered[bmu].append(point_id)
             except KeyError:
@@ -199,6 +201,20 @@ if __name__ == "__main__":
         [34.754646029,52.668644032],
         [34.753865004,52.669138983],
         [34.771071039,52.658235971]
+    ])
+
+    data2 = np.array([
+        [34.746993016,52.706206022],
+        [34.747126959,52.706670966],
+        [34.747186974,52.707015965],
+        [34.747258974,52.70734001],
+        [34.747356037,52.707667993],
+        [34.747418985,52.706163023],
+        [34.747858029,52.706148019],
+        [34.747888036,52.706127986],
+        [34.748256002,52.706080042],
+        [34.74869404,52.70605104],
+        [34.748547021,52.704327973],
     ])
 
     som = SOM1d(data1)
