@@ -26,7 +26,7 @@ from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, QOb
 from PyQt4.QtGui import QAction, QIcon, QMessageBox
 # Import the code for the dialog
 import os.path
-from qgis.core import QgsVectorLayer, QGis, QgsGeometry, QgsFeature, QgsPoint, QgsApplication
+from qgis.core import QgsVectorLayer, QGis, QgsGeometry, QgsFeature, QgsPoint, QgsApplication, QgsCoordinateTransform
 from qgis.gui import QgsMessageBar
 from .connector import SOM1d
 
@@ -240,7 +240,7 @@ class Points2LineOTF:
         for feature in layer.selectedFeatures():
             self._geom_buffer.append(feature.geometry().vertexAt(0))
 
-        #self._srid = layer
+        self._srid = layer.crs()
 
         self.check_buttons_state()
         self.iface.messageBar().pushMessage(self.tr("Points2Line OTF"),
@@ -296,7 +296,11 @@ class Points2LineOTF:
 
             geom = QgsGeometry.fromPolyline(self._geom_buffer)
 
-            # TODO: check crs?
+            # Check crs and reproject
+            target_crs = layer.crs()
+            if target_crs.srsid() != self._srid:
+                transf = QgsCoordinateTransform(self._srid, target_crs)
+                geom.transform(transf)
 
             # Insert feature
             feat = QgsFeature()
