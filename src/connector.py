@@ -229,7 +229,7 @@ if __name__ == "__main__":
         [34.748547021,52.704327973],
     ])
 
-    som = SOM1d(data)
+    som = SOM1d(data1)
     result = som.connect()
 
     import matplotlib.pyplot as plt

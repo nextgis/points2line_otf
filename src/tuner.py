@@ -19,6 +19,16 @@ class Tuner():
         d = np.sum(abs(x1 - x2)[1:])  # (x1 - x2)[0] is the distance between the first and the last points
         return d
 
+    def roll_to_max_distance(self, order):
+        # Roll the order that,
+        # so the first and the last points are the most distance
+        x1 = np.take(self.data, order)
+        x2 = np.roll(x1, 1)
+        d = abs(x1 - x2)
+        idx = np.argmax(d)
+        return np.roll(order, -idx)
+
+
     def permute(self, index, order):
         tests = np.empty((self.size, self.size), dtype=np.int)
         num = order[index]
@@ -33,8 +43,11 @@ class Tuner():
         global_best_penalty = self.penalty(init_order)
         global_best_order = init_order
 
-        for i in range(self.size):
-            best_order = np.roll(init_order, i)
+        # List of candidates of good start point to optimize:
+        # eliminate the biggest distance from
+        candidates = [init_order, self.roll_to_max_distance(init_order)]
+
+        for best_order in candidates:
             best_penalty = self.penalty(best_order)
 
             final = False
