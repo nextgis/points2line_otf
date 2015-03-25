@@ -2,114 +2,65 @@
 
 import numpy as np
 
-class SOM1d():
-    '''1-d self organizing map for 2-dimmential inputs
-    '''
+class Connector():
     def __init__(self, data):
         assert len(data.shape) == 2
-        self.data = data.copy()
+        # self.data = data.copy()
 
-        self.x_avg = np.average(data[:, 0], axis=0)
-        self.y_avg = np.average(data[:, 1], axis=0)
-
-        self.x_std = np.std(data[:, 0], axis=0)
-        self.y_std = np.std(data[:, 1], axis=0)
-
-        ratio = 4.0/3.0     # (Number of SOM unit) / (Number of points)
-        self.w = np.zeros((data.shape[0]*ratio, 2))
-
+        # Computation of distance matrix:
+        self.z = np.array([complex(p[0], p[1]) for p in data])
+        # mesh this array so that you will have all combinations
+        m, n = np.meshgrid(self.z, self.z)
+        # get the distance via the norm
+        self.dists = abs(m-n)
 
     @property
     def size(self):
-        return self.w.shape[0]
+        return self.z.shape[0]
 
-    def normalize(self):
-        self.data[:, 0] = (self.data[:, 0] - self.x_avg)/self.x_std
-        self.data[:, 1] = (self.data[:, 1] - self.y_avg)/self.y_std
+    def find_ends(self):
+        # Try to find indexes of the first and the latest points.
+        # The euristic is:
+        #   * if a point is a middle point, then the direction to the two
+        #   closest points are different.
+        #   * if a point is a end point, then the direction to the two
+        #   closest points are similar.
 
+        # find directions to two closest points
+        d = np.zeros(self.size)
+        for i in range(self.size):
+            x = np.argsort(self.dists[i, :])[1:3]
+            # vectors from i-th point to the closest points
+            vects = np.array([self.z[x[0]], self.z[x[1]]]) - self.z[i]
+            # similarity (the angle)
+            d[i] = abs(np.angle(vects[0]) - np.angle(vects[1]))
 
-    def denormalyze(self):
-        self.data[:, 0] = self.x_std*self.data[:, 0] + self.x_avg
-        self.data[:, 1] = self.y_std*self.data[:, 1] + self.y_avg
+        init, last = np.argsort(d)[:2]
+        return (init, last)
 
-        self.w[:, 0] = self.x_std*self.w[:, 0] + self.x_avg
-        self.w[:, 1] = self.y_std*self.w[:, 1] + self.y_avg
+    def get_closest(self, index, pull):
+        x = pull[0]
+        d = self.dists[index, x]
+        for c in pull[1: ]:
+            if self.dists[index, c] < d:
+                d = self.dists[index, c]
+                x = c
 
-    def distances(self, point):
-        '''Return array of Euclidean distances between self.w and point
-        '''
-        diff = self.w - point
-        return np.sqrt(np.sum(diff**2, axis=1))
-
-    def BMU_idx(self, point):
-        '''Return index of best matching unit pf the point
-        '''
-        dists = self.distances(point)
-        return np.argmin(dists)
-
-    def gaussian(self, c, sigma, circular=False):
-        """ Returns a Gaussian centered in c """
-        d = 2*np.pi * sigma**2
-
-        if not circular:
-            dists = range(self.size)-c
-        else:
-            dx = np.abs(np.arange(self.size)-c)
-            dx1 = abs(self.size - np.mod(dx, self.size))
-            dists = np.min(np.array([dx, dx1]),  axis=0)
-
-        ax = np.exp(-np.power(dists, 2)/d)
-        return ax
-
-    def update(self, sigma, circular):
-        data = np.random.permutation(self.data)
-
-        for point in data:
-            bmu = self.BMU_idx(point)
-
-            delta = (point - self.w[bmu, :])
-            bubble = self.gaussian(bmu, sigma, circular=circular)
-
-            dx = delta[0] * bubble
-            dy = delta[1] * bubble
-
-            self.w[:, 0] += dx
-            self.w[:, 1] += dy
-
-    def train(self,rlen, lrate=0.99, sigma_init=5.0, circular=False):
-        sigma = sigma_init
-        for t in range(rlen):
-            sigma = sigma * lrate
-            self.update(sigma, circular)
+        pull.remove(x)
+        return x, pull
 
     def connect(self):
-        # train SOM
-        self.normalize()
-        self.train(self.size*150, lrate=0.99, sigma_init=self.size, circular=False)
-        self.train(self.size*500, lrate=0.99, sigma_init=2, circular=False)
-        self.denormalyze()
+        pull = range(self.size)
 
-        ordered = {}
-        for point in self.data:
-            bmu = self.BMU_idx(point)
-            try:
-                ordered[bmu].append(point)
-            except KeyError:
-                ordered[bmu] = [point]
+        x = self.find_ends()[0]
+        order = [x]
+        pull.remove(x)
+        while len(pull) > 0:
+            x, pull = self.get_closest(x, pull)
+            order.append(x)
 
-        result = []
-        for i in range(self.size):
-            try:
-                pnts = ordered[i]
-                if len(pnts) != 1:
-                    print 'WARNING: points are not ordered', pnts
-                    for point in pnts:
-                        result.append(point.tolist())
-                else:
-                    result.append(pnts[0].tolist())
-            except KeyError:
-                # It's Ok
-                pass
+        result = np.take(self.z, order, axis=0)
+        result = np.array([[z.real, z.imag] for z in result])
 
         return result
 
@@ -131,9 +82,10 @@ if __name__ == "__main__":
         [1, 3]
     ])
 
-    som = SOM1d(data)
-    print som.connect()
+    con = Connector(data)
+    result = con.connect()
+    print result
 
     import matplotlib.pyplot as plt
-    plt.plot(som.w[:, 0], som.w[:, 1], 'r-o', som.data[:,0], som.data[:,1], 'o')
+    plt.plot(result[:, 0], result[:, 1], 'r-o', con.z.real, con.z.imag, 'o')
     plt.show()

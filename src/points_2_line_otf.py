@@ -28,7 +28,7 @@ from PyQt4.QtGui import QAction, QIcon, QMessageBox
 import os.path
 from qgis.core import QgsVectorLayer, QGis, QgsGeometry, QgsFeature, QgsPoint, QgsApplication
 from qgis.gui import QgsMessageBar
-from .connector import SOM1d
+from .connector import Connector
 
 
 CURR_PATH = os.path.dirname(__file__)
@@ -286,8 +286,8 @@ class Points2LineOTF:
                 points.append((in_geom.x(), in_geom.y()))
             data = np.array(points)
             # Make line
-            som = SOM1d(data)
-            result = som.connect()
+            connector = Connector(data)
+            result = connector.connect()
 
             #np to QGS
             self._geom_buffer = []
