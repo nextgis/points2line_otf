@@ -4,7 +4,7 @@
 
 To do it we use 1-d Self Organising Map. It allows:
   order data points
-  connect closests points
+  connect nearest points
 '''
 
 import numpy as np
@@ -35,31 +35,31 @@ class SOM1d():
     def size(self):
         return self.w.shape[0]
 
-    def normalize(self):
+    def _normalize(self):
         self.z.real = (self.z.real - self.x_avg)/self.x_std
         self.z.imag = (self.z.imag - self.y_avg)/self.y_std
 
 
-    def denormalyze(self):
+    def _denormalyze(self):
         self.z.real = self.x_std*self.z.real + self.x_avg
         self.z.imag = self.y_std*self.z.imag + self.y_avg
 
         self.w.real = self.x_std*self.w.real + self.x_avg
         self.w.imag = self.y_std*self.w.imag + self.y_avg
 
-    def distances(self, point):
+    def _distances(self, point):
         '''Return array of Euclidean distances between self.w and point
         '''
         diff = self.w - point
         return abs(diff)
 
-    def BMU_idx(self, point):
+    def _BMU_idx(self, point):
         '''Return index of best matching unit pf the point
         '''
-        dists = self.distances(point)
+        dists = self._distances(point)
         return np.argmin(dists)
 
-    def gaussian(self, c, sigma, circular=False):
+    def _gaussian(self, c, sigma, circular=False):
         """ Returns a Gaussian centered in c """
         d = 2*np.pi * sigma**2
 
@@ -73,35 +73,35 @@ class SOM1d():
         ax = np.exp(-np.power(dists, 2)/d)
         return ax
 
-    def update(self, sigma, circular):
+    def _update(self, sigma, circular):
         data = np.random.permutation(self.z)
         for point in data:
-            bmu = self.BMU_idx(point)
+            bmu = self._BMU_idx(point)
 
             delta = (point - self.w[bmu])
-            bubble = self.gaussian(bmu, sigma, circular=circular)
+            bubble = self._gaussian(bmu, sigma, circular=circular)
             delta = delta * bubble
 
             self.w += delta
 
-    def train(self,rlen, lrate=0.99, sigma_init=5.0, circular=False):
+    def _train(self,rlen, lrate=0.99, sigma_init=5.0, circular=False):
         sigma = sigma_init
         for t in range(rlen):
             sigma = sigma * lrate
             if sigma < EPSILON:
                 break
-            self.update(sigma, circular)
+            self._update(sigma, circular)
 
     def connect(self):
         # train SOM
-        self.normalize()
-        self.train(self.size*100, lrate=0.99, sigma_init=self.size, circular=False)
-        self.train(self.size*250, lrate=0.99, sigma_init=2, circular=False)
-        self.denormalyze()
+        self._normalize()
+        self._train(self.size*100, lrate=0.99, sigma_init=self.size, circular=False)
+        self._train(self.size*250, lrate=0.99, sigma_init=2, circular=False)
+        self._denormalyze()
 
         ordered = {}
         for point_id in range(len(self.z)):
-            bmu = self.BMU_idx(self.z[point_id])
+            bmu = self._BMU_idx(self.z[point_id])
             try:
                 ordered[bmu].append(point_id)
             except KeyError:
@@ -121,6 +121,8 @@ class SOM1d():
                 # It's Ok, if self.size > len(self.z)
                 pass
 
+        # Some shapes of points (eg., angles) are difficult for SOM.
+        # Use a little of postprocessing for tuning
         tuner = Tuner(self.z)
         order = tuner.reorder(order)
 
@@ -227,10 +229,11 @@ if __name__ == "__main__":
         [34.748547021,52.704327973],
     ])
 
-    som = SOM1d(data1)
+    som = SOM1d(data)
     result = som.connect()
 
     import matplotlib.pyplot as plt
-    plt.plot(som.z.real, som.z.imag, 'o', som.w.real, som.w.imag, 'r-o',
+    plt.plot(som.z.real, som.z.imag, 'o',
+            # som.w.real, som.w.imag, 'r-o',
             result[:, 0], result[:, 1], '-g')
     plt.show()
