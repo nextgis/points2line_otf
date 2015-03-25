@@ -1,10 +1,10 @@
 #!/bin/bash
 
 #Create base file
-#pylupdate4 -noobsolete ./src/*.{py,ui} -ts ./src/i18n/base.ts
+#pylupdate4 -noobsolete ./src/*.py -ts ./src/i18n/base.ts
 
 #Update translate files
-pylupdate4 -noobsolete ./src/*.{py,ui} -ts ./src/i18n/*.ts
+pylupdate4 -noobsolete ./src/*.py -ts ./src/i18n/*.ts
 echo "TS files have been updated!"
 
 #Check
