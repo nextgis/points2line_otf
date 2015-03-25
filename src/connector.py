@@ -2,12 +2,15 @@
 
 import numpy as np
 
+EPSILON = 0.0001    # A small number
+
 class SOM1d():
     '''1-d self organizing map for 2-dimmential inputs
     '''
     def __init__(self, data):
         assert len(data.shape) == 2
-        self.data = data.copy()
+
+        self.z = np.array([complex(p[0], p[1]) for p in data])
 
         self.x_avg = np.average(data[:, 0], axis=0)
         self.y_avg = np.average(data[:, 1], axis=0)
@@ -16,7 +19,7 @@ class SOM1d():
         self.y_std = np.std(data[:, 1], axis=0)
 
         ratio = 4.0/3.0     # (Number of SOM unit) / (Number of points)
-        self.w = np.zeros((data.shape[0]*ratio, 2))
+        self.w = np.zeros(data.shape[0]*ratio, dtype=np.complex)
 
 
     @property
@@ -24,22 +27,22 @@ class SOM1d():
         return self.w.shape[0]
 
     def normalize(self):
-        self.data[:, 0] = (self.data[:, 0] - self.x_avg)/self.x_std
-        self.data[:, 1] = (self.data[:, 1] - self.y_avg)/self.y_std
+        self.z.real = (self.z.real - self.x_avg)/self.x_std
+        self.z.imag = (self.z.imag - self.y_avg)/self.y_std
 
 
     def denormalyze(self):
-        self.data[:, 0] = self.x_std*self.data[:, 0] + self.x_avg
-        self.data[:, 1] = self.y_std*self.data[:, 1] + self.y_avg
+        self.z.real = self.x_std*self.z.real + self.x_avg
+        self.z.imag = self.y_std*self.z.imag + self.y_avg
 
-        self.w[:, 0] = self.x_std*self.w[:, 0] + self.x_avg
-        self.w[:, 1] = self.y_std*self.w[:, 1] + self.y_avg
+        self.w.real = self.x_std*self.w.real + self.x_avg
+        self.w.imag = self.y_std*self.w.imag + self.y_avg
 
     def distances(self, point):
         '''Return array of Euclidean distances between self.w and point
         '''
         diff = self.w - point
-        return np.sqrt(np.sum(diff**2, axis=1))
+        return abs(diff)
 
     def BMU_idx(self, point):
         '''Return index of best matching unit pf the point
@@ -62,54 +65,55 @@ class SOM1d():
         return ax
 
     def update(self, sigma, circular):
-        data = np.random.permutation(self.data)
-
+        data = np.random.permutation(self.z)
         for point in data:
             bmu = self.BMU_idx(point)
 
-            delta = (point - self.w[bmu, :])
+            delta = (point - self.w[bmu])
             bubble = self.gaussian(bmu, sigma, circular=circular)
+            delta = delta * bubble
 
-            dx = delta[0] * bubble
-            dy = delta[1] * bubble
-
-            self.w[:, 0] += dx
-            self.w[:, 1] += dy
+            self.w += delta
 
     def train(self,rlen, lrate=0.99, sigma_init=5.0, circular=False):
         sigma = sigma_init
         for t in range(rlen):
             sigma = sigma * lrate
+            if sigma < EPSILON:
+                break
             self.update(sigma, circular)
 
     def connect(self):
         # train SOM
         self.normalize()
-        self.train(self.size*150, lrate=0.99, sigma_init=self.size, circular=False)
-        self.train(self.size*500, lrate=0.99, sigma_init=2, circular=False)
+        self.train(self.size*50, lrate=0.95, sigma_init=self.size, circular=False)
+        self.train(self.size*250, lrate=0.99, sigma_init=2, circular=False)
         self.denormalyze()
 
         ordered = {}
-        for point in self.data:
-            bmu = self.BMU_idx(point)
+        for point_id in range(len(self.z)):
+            bmu = self.BMU_idx(point_id)
             try:
-                ordered[bmu].append(point)
+                ordered[bmu].append(point_id)
             except KeyError:
-                ordered[bmu] = [point]
+                ordered[bmu] = [point_id]
 
-        result = []
+        order = []
         for i in range(self.size):
             try:
                 pnts = ordered[i]
                 if len(pnts) != 1:
                     print 'WARNING: points are not ordered', pnts
-                    for point in pnts:
-                        result.append(point.tolist())
+                    for point_id in pnts:
+                        order.append(point_id)
                 else:
-                    result.append(pnts[0].tolist())
+                    order.append(pnts[0])
             except KeyError:
-                # It's Ok
+                # It's Ok, if self.size > len(self.z)
                 pass
+
+        result = np.take(self.z, order, axis=0)
+        result = np.array([[z.real, z.imag] for z in result])
 
         return result
 
@@ -131,9 +135,76 @@ if __name__ == "__main__":
         [1, 3]
     ])
 
-    som = SOM1d(data)
-    print som.connect()
+    data1 = np.array([
+        [34.773262991,52.656898974],
+        [34.77316903,52.656709962],
+        [34.772321032,52.656871984],
+        [34.771443028,52.657045992],
+        [34.770453963,52.657227963],
+        [34.76949499,52.657386968],
+        [34.768617991,52.657537004],
+        [34.767743004,52.657693997],
+        [34.766845973,52.65785099],
+        [34.765947014,52.65802701],
+        [34.765082002,52.658178974],
+        [34.764174996,52.65833999],
+        [34.763295986,52.658496983],
+        [34.762430973,52.658654982],
+        [34.761546012,52.658806024],
+        [34.760566,52.658975003],
+        [34.759678021,52.659143982],
+        [34.75881502,52.659289995],
+        [34.757920001,52.659457969],
+        [34.757035039,52.659610016],
+        [34.756114036,52.659775978],
+        [34.755199989,52.659943029],
+        [34.75427404,52.66009097],
+        [34.753378015,52.660273025],
+        [34.75253203,52.660425995],
+        [34.751642961,52.660590028],
+        [34.750703014,52.660750961],
+        [34.74987899,52.660898985],
+        [34.748970978,52.661063019],
+        [34.748048969,52.661219006],
+        [34.747141041,52.661388991],
+        [34.746245015,52.661553025],
+        [34.745294005,52.661717981],
+        [34.744335031,52.661794005],
+        [34.743413022,52.661860976],
+        [34.742446002,52.661921997],
+        [34.741450986,52.662007995],
+        [34.740509028,52.662063986],
+        [34.73963798,52.662112014],
+        [34.738820996,52.662183009],
+        [34.772797041,52.657160992],
+        [34.771933034,52.657704977],
+        [34.770236034,52.658766964],
+        [34.769355012,52.659326037],
+        [34.76850098,52.659875974],
+        [34.767625993,52.660431024],
+        [34.766791994,52.660960006],
+        [34.765842995,52.661571968],
+        [34.764949987,52.662127018],
+        [34.764039963,52.662702017],
+        [34.763292968,52.663179031],
+        [34.762440026,52.663719999],
+        [34.761606026,52.664241018],
+        [34.760725005,52.664806964],
+        [34.75988497,52.665335024],
+        [34.75904502,52.66585202],
+        [34.758163998,52.666408997],
+        [34.757231008,52.667002017],
+        [34.756441014,52.667503003],
+        [34.755566027,52.668050006],
+        [34.754646029,52.668644032],
+        [34.753865004,52.669138983],
+        [34.771071039,52.658235971]
+    ])
+
+    som = SOM1d(data1)
+    result = som.connect()
 
     import matplotlib.pyplot as plt
-    plt.plot(som.w[:, 0], som.w[:, 1], 'r-o', som.data[:,0], som.data[:,1], 'o')
+    plt.plot(som.z.real, som.z.imag, 'o', som.w.real, som.w.imag, 'r-o',
+            result[:, 0], result[:, 1], '-g')
     plt.show()
