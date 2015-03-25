@@ -1,6 +1,15 @@
 # -*- coding: utf-8 -*-
 
+'''The main idea of the processing is to constrict Hamiltonian path.
+
+To do it we use 1-d Self Organising Map. It allows:
+  order data points
+  connect closests points
+'''
+
 import numpy as np
+
+from tuner import Tuner
 
 EPSILON = 0.00001    # A small number
 
@@ -90,8 +99,6 @@ class SOM1d():
         self.train(self.size*250, lrate=0.99, sigma_init=2, circular=False)
         self.denormalyze()
 
-        print self.w
-
         ordered = {}
         for point_id in range(len(self.z)):
             bmu = self.BMU_idx(self.z[point_id])
@@ -114,7 +121,10 @@ class SOM1d():
                 # It's Ok, if self.size > len(self.z)
                 pass
 
-        result = np.take(self.z, order, axis=0)
+        tuner = Tuner(self.z)
+        order = tuner.reorder(order)
+
+        result = np.take(self.z, order)
         result = np.array([[z.real, z.imag] for z in result])
 
         return result
