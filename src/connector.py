@@ -232,8 +232,8 @@ if __name__ == "__main__":
     som = SOM1d(data1)
     result = som.connect()
 
-    import matplotlib.pyplot as plt
-    plt.plot(som.z.real, som.z.imag, 'o',
-            # som.w.real, som.w.imag, 'r-o',
-            result[:, 0], result[:, 1], '-g')
-    plt.show()
+    #~ import matplotlib.pyplot as plt
+    #~ plt.plot(som.z.real, som.z.imag, 'o',
+            #~ # som.w.real, som.w.imag, 'r-o',
+            #~ result[:, 0], result[:, 1], '-g')
+    #~ plt.show()

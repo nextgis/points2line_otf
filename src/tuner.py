@@ -39,29 +39,42 @@ class Tuner():
 
         return tests
 
+    def local_opt(self, init_order):
+        '''Reorder some points to find local optimum
+        '''
+        best_penalty = self.penalty(init_order)
+        best_order = init_order
+
+        final = False
+        while not final:
+            final = True
+            for idx in range(self.size):
+                for order in self.permute(idx, best_order):
+                    if self.penalty(order) < best_penalty:
+                        best_order = order
+                        best_penalty = self.penalty(order)
+                        final = False
+                        break
+
+        return (best_penalty, best_order)
+
     def reorder(self, init_order):
-        global_best_penalty = self.penalty(init_order)
-        global_best_order = init_order
 
-        # List of candidates of good start point to optimize:
-        # eliminate the biggest distance from
-        candidates = [init_order, self.roll_to_max_distance(init_order)]
+        # List of candidates (good start points) for optimize.
+        # Candidate 1: eliminate the biggest distance from the point list
+        cand1 = self.roll_to_max_distance(init_order)
+        if np.all(cand1 == init_order):
+            candidates = [init_order]
+        else:
+            candidates = [init_order, cand1]
 
-        for best_order in candidates:
-            best_penalty = self.penalty(best_order)
+        # TODO: This line can ne done in 2 threads
+        penalties = [self.local_opt(order) for order in candidates]
 
-            final = False
-            while not final:
-                final = True
-                for idx in range(self.size):
-                    for order in self.permute(idx, best_order):
-                        if self.penalty(order) < best_penalty:
-                            best_order = order
-                            best_penalty = self.penalty(order)
-                            final = False
-                            break
-            if best_penalty < global_best_penalty:
-                global_best_penalty = best_penalty
-                global_best_order = best_order
+        if len(penalties) == 1:
+            return penalties[0][1]
 
-        return global_best_order
+        if penalties[0][0] < penalties[1][0]:
+            return penalties[0][1]
+        else:
+            return penalties[1][1]
