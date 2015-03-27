@@ -27,7 +27,7 @@ from PyQt4.QtGui import QAction, QIcon, QMessageBox
 # Import the code for the dialog
 import os.path
 from qgis.core import QgsVectorLayer, QGis, QgsGeometry, QgsFeature, QgsPoint, QgsApplication, QgsCoordinateTransform
-from qgis.gui import QgsMessageBar
+from qgis.gui import QgsMessageBar, QgsAttributeDialog
 from .connector import SOM1d
 
 
@@ -182,8 +182,8 @@ class Points2LineOTF:
         QObject.connect(self.iface.mapCanvas(), SIGNAL('selectionChanged(QgsMapLayer *)'), self.check_buttons_state)
         QObject.connect(self.iface.actionToggleEditing(), SIGNAL('triggered()'), self.check_buttons_state)
 
-        #import pydevd
-        #pydevd.settrace('localhost', port=9921, stdoutToServer=True, stderrToServer=True, suspend=False)
+        import pydevd
+        pydevd.settrace('localhost', port=9922, stdoutToServer=True, stderrToServer=True, suspend=False)
 
 
 
@@ -294,31 +294,44 @@ class Points2LineOTF:
             for out_geom in result:
                 self._geom_buffer.append(QgsPoint(out_geom[0], out_geom[1]))
 
-            geom = QgsGeometry.fromPolyline(self._geom_buffer)
+            if layer.wkbType() == QGis.WKBMultiLineString:
+                geom = QgsGeometry.fromMultiPolyline([self._geom_buffer])
+            else:
+                geom = QgsGeometry.fromPolyline(self._geom_buffer)
 
             # Check crs and reproject
             target_crs = layer.crs()
-            if target_crs.srsid() != self._srid:
+            if target_crs.srsid() != self._srid.srsid():
                 transf = QgsCoordinateTransform(self._srid, target_crs)
                 geom.transform(transf)
 
             # Insert feature
             feat = QgsFeature()
+            feat.setFields(layer.dataProvider().fields())
             feat.setGeometry(geom)
-            result = layer.dataProvider().addFeatures([feat])
 
-            #show message
+            suppressForm = QSettings().value("/qgis/digitizing/disable_enter_attribute_values_dialog", type=bool, defaultValue=False)
+
+            if suppressForm:
+                # quite insert feature
+                result = layer.addFeatures([feat])
+            else:
+                # show dialog
+                QgsApplication.restoreOverrideCursor()
+                attrDialog = QgsAttributeDialog(layer, feat, False)
+                attrDialog.setIsAddDialog(True)
+                result = attrDialog.exec_()
+
+            # show message
             self.iface.messageBar().clearWidgets()
             if result:
                 self.iface.messageBar().pushMessage(self.tr("Points2Line OTF"),
                                                 self.tr("One line was sucesfull added"),
-                                                level=QgsMessageBar.INFO,
-                                                duration=5)
+                                                level=QgsMessageBar.INFO)
             else:
                 self.iface.messageBar().pushMessage(self.tr("Points2Line OTF"),
                                                 self.tr("Line was not added"),
-                                                level=QgsMessageBar.CRITICAL,
-                                                duration=5)
+                                                level=QgsMessageBar.CRITICAL)
 
             self.iface.mapCanvas().refresh()
         finally:
