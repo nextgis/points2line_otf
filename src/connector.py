@@ -59,44 +59,39 @@ class SOM1d():
         dists = self._distances(point)
         return np.argmin(dists)
 
-    def _gaussian(self, c, sigma, circular=False):
+    def _gaussian(self, c, sigma):
         """ Returns a Gaussian centered in c """
         d = 2*np.pi * sigma**2
 
-        if not circular:
-            dists = range(self.size)-c
-        else:
-            dx = np.abs(np.arange(self.size)-c)
-            dx1 = abs(self.size - np.mod(dx, self.size))
-            dists = np.min(np.array([dx, dx1]),  axis=0)
-
+        dists = range(self.size)-c
         ax = np.exp(-np.power(dists, 2)/d)
+
         return ax
 
-    def _update(self, sigma, circular):
+    def _update(self, sigma):
         data = np.random.permutation(self.z)
         for point in data:
             bmu = self._BMU_idx(point)
 
             delta = (point - self.w[bmu])
-            bubble = self._gaussian(bmu, sigma, circular=circular)
+            bubble = self._gaussian(bmu, sigma)
             delta = delta * bubble
 
             self.w += delta
 
-    def _train(self,rlen, lrate=0.99, sigma_init=5.0, circular=False):
+    def _train(self,rlen, lrate=0.99, sigma_init=5.0):
         sigma = sigma_init
         for t in range(rlen):
             sigma = sigma * lrate
             if sigma < EPSILON:
                 break
-            self._update(sigma, circular)
+            self._update(sigma)
 
     def connect(self):
         # train SOM
         self._normalize()
-        self._train(self.size*100, lrate=0.99, sigma_init=self.size, circular=False)
-        self._train(self.size*250, lrate=0.99, sigma_init=2, circular=False)
+        self._train(self.size*100, lrate=0.99, sigma_init=self.size)
+        self._train(self.size*250, lrate=0.99, sigma_init=2)
         self._denormalyze()
 
         ordered = {}
