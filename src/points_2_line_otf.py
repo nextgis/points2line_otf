@@ -182,8 +182,8 @@ class Points2LineOTF:
         QObject.connect(self.iface.mapCanvas(), SIGNAL('selectionChanged(QgsMapLayer *)'), self.check_buttons_state)
         QObject.connect(self.iface.actionToggleEditing(), SIGNAL('triggered()'), self.check_buttons_state)
 
-        import pydevd
-        pydevd.settrace('localhost', port=9922, stdoutToServer=True, stderrToServer=True, suspend=False)
+        # import pydevd
+        # pydevd.settrace('localhost', port=9922, stdoutToServer=True, stderrToServer=True, suspend=False)
 
 
 
