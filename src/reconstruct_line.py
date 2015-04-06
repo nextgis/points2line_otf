@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 /***************************************************************************
- Points2LineOTF
-                                 A QGIS plugin
- On-the-fly tool for convert points to line
+ ReconstructLine
+ QGIS tool to reconstruct linear features from points
                               -------------------
         begin                : 2015-03-23
         git sha              : $Format:%H$
