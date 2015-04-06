@@ -2,11 +2,11 @@
 <!DOCTYPE TS>
 <TS version="2.0" language="ru">
 <context>
-    <name>Points2LineOTF</name>
+    <name>ReconstructLine</name>
     <message>
         <location filename="reconstruct_line.py" line="193"/>
-        <source>&amp;Points2Line OTF</source>
-        <translation>&amp;Points2Line OTF</translation>
+        <source>&amp;ReconstructLine</source>
+        <translation>&amp;ReconstructLine</translation>
     </message>
     <message>
         <location filename="reconstruct_line.py" line="166"/>
@@ -40,8 +40,8 @@
     </message>
     <message>
         <location filename="reconstruct_line.py" line="314"/>
-        <source>Points2Line OTF</source>
-        <translation>Points2Line OTF</translation>
+        <source>ReconstructLine</source>
+        <translation>ReconstructLine</translation>
     </message>
     <message>
         <location filename="reconstruct_line.py" line="246"/>
