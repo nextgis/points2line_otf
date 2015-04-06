@@ -1,7 +1,7 @@
 #/***************************************************************************
-# Points2LineOTF
+# ReconstructLine
 #
-# On-the-fly tool for convert points to line
+# QGIS tool to reconstruct linear features from points
 #							 -------------------
 #		begin				: 2015-03-23
 #		git sha				: $Format:%H$
@@ -39,17 +39,17 @@ LOCALES =
 # translation
 SOURCES = \
 	__init__.py \
-	points_to_line_otf.py \
-	points_to_line_otf_dialog.py
+	reconstruct_line.py \
+	reconstruct_line_dialog.py
 
-PLUGINNAME = Points2LineOTF
+PLUGINNAME = ReconstructLine
 
 PY_FILES = \
-	points_to_line_otf.py \
-	points_to_line_otf_dialog.py \
+	reconstruct_line.py \
+	reconstruct_line_dialog.py \
 	__init__.py
 
-UI_FILES = points_to_line_otf_dialog_base.ui
+UI_FILES = reconstruct_line_dialog_base.ui
 
 EXTRAS = icon.png metadata.txt
 
