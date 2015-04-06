@@ -7,9 +7,9 @@
 # This file should be included when you package your plugin.# Mandatory items:
 
 [general]
-name=Points2Line OTF
+name=ReconstructLine
 qgisMinimumVersion=2.6
-description=On-the-fly tool for convert points to line
+description=QGIS tool to reconstruct linear features from points
 version=0.3
 author=NextGIS
 
@@ -29,9 +29,9 @@ changelog= 0.3:
 # Tags are comma separated with spaces allowed
 tags=Vector Point Line Merge OTF
 
-homepage=https://github.com/nextgis/points2line_otf
-tracker=https://github.com/nextgis/points2line_otf/issues
-repository=https://github.com/nextgis/points2line_otf
+homepage=https://github.com/nextgis/ReconstructLine
+tracker=https://github.com/nextgis/ReconstructLine/issues
+repository=https://github.com/nextgis/ReconstructLine
 category=Vector
 icon=save_line.png
 # experimental flag
