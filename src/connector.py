@@ -1,14 +1,33 @@
 # -*- coding: utf-8 -*-
+"""
+/***************************************************************************
+ ReconstructLine
+ QGIS tool to reconstruct linear features from points
 
-'''The main idea of the processing is to constrict Hamiltonian path.
+The main idea of the processing is to constrict Hamiltonian path.
 
 To do it we use 1-d Self Organising Map. It allows:
   order data points
   connect nearest points
-'''
 
+                              -------------------
+        begin                : 2015-03-23
+        git sha              : $Format:%H$
+        copyright            : (C) 2015 by NextGIS
+
+        email                : info@nextgis.com
+ ***************************************************************************/
+
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ ***************************************************************************/
+"""
 import numpy as np
-
 from tuner import Tuner
 
 EPSILON = 0.00001    # A small number

@@ -32,7 +32,7 @@ from .connector import SOM1d
 
 CURR_PATH = os.path.dirname(__file__)
 
-class Points2LineOTF:
+class ReconstructLine:
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface):
@@ -52,7 +52,7 @@ class Points2LineOTF:
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
-            'Points2LineOTF_{}.qm'.format(locale))
+            'ReconstructLine_{}.qm'.format(locale))
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
@@ -63,10 +63,10 @@ class Points2LineOTF:
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u'&Points2Line OTF')
+        self.menu = self.tr(u'&Reconstruct line')
         # TODO: We are going to let the user set this up in a future iteration
-        self.toolbar = self.iface.addToolBar(u'Points2LineOTF')
-        self.toolbar.setObjectName(u'Points2LineOTF')
+        self.toolbar = self.iface.addToolBar(u'ReconstructLine')
+        self.toolbar.setObjectName(u'ReconstructLine')
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -81,7 +81,7 @@ class Points2LineOTF:
         :rtype: QString
         """
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
-        return QCoreApplication.translate('Points2LineOTF', message)
+        return QCoreApplication.translate('ReconstructLine', message)
 
 
     def add_action(
@@ -190,7 +190,7 @@ class Points2LineOTF:
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
             self.iface.removePluginVectorMenu(
-                self.tr(u'&Points2Line OTF'),
+                self.tr(u'&Reconstruct Line'),
                 action)
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
@@ -242,7 +242,7 @@ class Points2LineOTF:
         self._srid = layer.crs()
 
         self.check_buttons_state()
-        self.iface.messageBar().pushMessage(self.tr("Points2Line OTF"),
+        self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
                                             self.tr("Total points was copied: ") + str(len(self._geom_buffer)),
                                             level=QgsMessageBar.INFO,
                                             duration=5)
@@ -267,7 +267,7 @@ class Points2LineOTF:
 
         #show message
         self.iface.messageBar().clearWidgets()
-        self.iface.messageBar().pushMessage(self.tr("Points2Line OTF"),
+        self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
                                             self.tr("Processing points. Please wait..."),
                                             level=QgsMessageBar.INFO
                                             )
@@ -324,11 +324,11 @@ class Points2LineOTF:
             # show message
             self.iface.messageBar().clearWidgets()
             if result:
-                self.iface.messageBar().pushMessage(self.tr("Points2Line OTF"),
+                self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
                                                 self.tr("One line was sucesfull added"),
                                                 level=QgsMessageBar.INFO)
             else:
-                self.iface.messageBar().pushMessage(self.tr("Points2Line OTF"),
+                self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
                                                 self.tr("Line was not added"),
                                                 level=QgsMessageBar.CRITICAL)
 

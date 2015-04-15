@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
 /***************************************************************************
- Points2LineOTF
+ ReconstructLine
                                  A QGIS plugin
- On-the-fly tool for convert points to line
+ QGIS tool to reconstruct linear features from points
                              -------------------
         begin                : 2015-03-23
         copyright            : (C) 2015 by NextGIS
@@ -26,11 +26,11 @@
 
 # noinspection PyPep8Naming
 def classFactory(iface):  # pylint: disable=invalid-name
-    """Load Points2LineOTF class from file Points2LineOTF.
+    """Load ReconstructLine class from file ReconstructLine.
 
     :param iface: A QGIS interface instance.
     :type iface: QgsInterface
     """
     #
-    from .points_2_line_otf import Points2LineOTF
-    return Points2LineOTF(iface)
+    from .reconstruct_line import ReconstructLine
+    return ReconstructLine(iface)

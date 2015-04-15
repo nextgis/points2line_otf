@@ -2,7 +2,7 @@
 
 #Build zip packet
 BUILD_DIR=/tmp/build_plugin
-PLUGIN_NAME=points2line_otf
+PLUGIN_NAME=reconstruct_line
 
 #Create if need
 mkdir $BUILD_DIR
