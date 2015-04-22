@@ -107,7 +107,6 @@ class SOM1d():
             try:
                 pnts = ordered[i]
                 if len(pnts) != 1:
-                    print 'WARNING: points are not ordered', pnts
                     for point_id in pnts:
                         order.append(point_id)
                 else:
