@@ -13,62 +13,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="reconstruct_line.py" line="234"/>
-        <source>Points was not copied</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="reconstruct_line.py" line="224"/>
-        <source>Select any vector layer and feature!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="reconstruct_line.py" line="229"/>
-        <source>Only point vector layers are supported!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="reconstruct_line.py" line="234"/>
-        <source>Select two or more points!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="reconstruct_line.py" line="245"/>
-        <source>Total points was copied: </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="reconstruct_line.py" line="265"/>
-        <source>Line can&apos;t be inserted</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="reconstruct_line.py" line="254"/>
-        <source>Select any vector layer and feature for inserting geom!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="reconstruct_line.py" line="258"/>
-        <source>Only line vector layers are supported!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="reconstruct_line.py" line="262"/>
-        <source>Layer is not editable!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="reconstruct_line.py" line="265"/>
-        <source>Buffer is empty!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="reconstruct_line.py" line="270"/>
+        <location filename="reconstruct_line.py" line="266"/>
         <source>Processing points. Please wait...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="reconstruct_line.py" line="331"/>
+        <location filename="reconstruct_line.py" line="324"/>
         <source>Line was not added</source>
         <translation type="unfinished"></translation>
     </message>
@@ -78,18 +28,48 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="reconstruct_line.py" line="192"/>
+        <location filename="reconstruct_line.py" line="185"/>
         <source>&amp;Reconstruct Line</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="reconstruct_line.py" line="331"/>
+        <location filename="reconstruct_line.py" line="324"/>
         <source>ReconstructLine</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="reconstruct_line.py" line="327"/>
+        <location filename="reconstruct_line.py" line="320"/>
         <source>One line was sucesfull added</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="reconstruct_line.py" line="217"/>
+        <source>No points! Choose point layer and select points!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="reconstruct_line.py" line="225"/>
+        <source>No points! Select two or more points in the layer!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="reconstruct_line.py" line="235"/>
+        <source>Total points was copied: %d. Use &apos;Insert line&apos; button on new or existing line layer to make a line.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="reconstruct_line.py" line="244"/>
+        <source>Line can&apos;t be inserted! Select lines layer for inserting new geom!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="reconstruct_line.py" line="251"/>
+        <source>Line can&apos;t be inserted! Layer is not editable!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="reconstruct_line.py" line="258"/>
+        <source>Line can&apos;t be inserted! Copy points first!</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS><TS version="2.0" language="ru" sourcelanguage="">
+<!DOCTYPE TS>
+<TS version="2.0" language="ru">
 <context>
     <name>ReconstructLine</name>
     <message>
@@ -13,72 +14,22 @@
         <translation>Вставить линию</translation>
     </message>
     <message>
-        <location filename="reconstruct_line.py" line="234"/>
-        <source>Points was not copied</source>
-        <translation>Точки не скопированы</translation>
-    </message>
-    <message>
-        <location filename="reconstruct_line.py" line="224"/>
-        <source>Select any vector layer and feature!</source>
-        <translation>Выберете векторный слой и объекты!</translation>
-    </message>
-    <message>
-        <location filename="reconstruct_line.py" line="229"/>
-        <source>Only point vector layers are supported!</source>
-        <translation>Поддерживаются только точечные слои! </translation>
-    </message>
-    <message>
-        <location filename="reconstruct_line.py" line="234"/>
-        <source>Select two or more points!</source>
-        <translation>Выберите как минимум две точки!</translation>
-    </message>
-    <message>
-        <location filename="reconstruct_line.py" line="331"/>
+        <location filename="reconstruct_line.py" line="324"/>
         <source>ReconstructLine</source>
         <translation>ReconstructLine</translation>
     </message>
     <message>
-        <location filename="reconstruct_line.py" line="245"/>
-        <source>Total points was copied: </source>
-        <translation>Всего точек скопировано: </translation>
-    </message>
-    <message>
-        <location filename="reconstruct_line.py" line="265"/>
-        <source>Line can&apos;t be inserted</source>
-        <translation>Линия не может быть вставлена</translation>
-    </message>
-    <message>
-        <location filename="reconstruct_line.py" line="254"/>
-        <source>Select any vector layer and feature for inserting geom!</source>
-        <translation>Выберете векторный слой для вставки геометрии!</translation>
-    </message>
-    <message>
-        <location filename="reconstruct_line.py" line="258"/>
-        <source>Only line vector layers are supported!</source>
-        <translation>Поддерживаются только линейные слои!</translation>
-    </message>
-    <message>
-        <location filename="reconstruct_line.py" line="262"/>
-        <source>Layer is not editable!</source>
-        <translation>Слой не в режиме редактирования!</translation>
-    </message>
-    <message>
-        <location filename="reconstruct_line.py" line="265"/>
-        <source>Buffer is empty!</source>
-        <translation>Буфер обмена пуст!</translation>
-    </message>
-    <message>
-        <location filename="reconstruct_line.py" line="270"/>
+        <location filename="reconstruct_line.py" line="266"/>
         <source>Processing points. Please wait...</source>
         <translation>Обработка точек. Пожалуйста подождите...</translation>
     </message>
     <message>
-        <location filename="reconstruct_line.py" line="327"/>
+        <location filename="reconstruct_line.py" line="320"/>
         <source>One line was sucesfull added</source>
         <translation>Одна линия успешно добавлена</translation>
     </message>
     <message>
-        <location filename="reconstruct_line.py" line="331"/>
+        <location filename="reconstruct_line.py" line="324"/>
         <source>Line was not added</source>
         <translation>Линия не добавлена</translation>
     </message>
@@ -88,9 +39,39 @@
         <translation>&amp;Reconstruct line</translation>
     </message>
     <message>
-        <location filename="reconstruct_line.py" line="192"/>
+        <location filename="reconstruct_line.py" line="185"/>
         <source>&amp;Reconstruct Line</source>
         <translation>&amp;Reconstruct Line</translation>
+    </message>
+    <message>
+        <location filename="reconstruct_line.py" line="217"/>
+        <source>No points! Choose point layer and select points!</source>
+        <translation>Точки не скопированы! Выберите точечный слой и несколько точек в нем!</translation>
+    </message>
+    <message>
+        <location filename="reconstruct_line.py" line="225"/>
+        <source>No points! Select two or more points in the layer!</source>
+        <translation>Точки не скопированы! Выберите две или более точек в слое!</translation>
+    </message>
+    <message>
+        <location filename="reconstruct_line.py" line="235"/>
+        <source>Total points was copied: %d. Use &apos;Insert line&apos; button on new or existing line layer to make a line.</source>
+        <translation>Всего скопировано точек: %d. Используйте кнопку &apos;Вставить линию&apos; для нового или существующего линейного слоя.</translation>
+    </message>
+    <message>
+        <location filename="reconstruct_line.py" line="244"/>
+        <source>Line can&apos;t be inserted! Select lines layer for inserting new geom!</source>
+        <translation>Линия не может быть вставлена! Выберите линейный слой для вставки новой геометрии!</translation>
+    </message>
+    <message>
+        <location filename="reconstruct_line.py" line="251"/>
+        <source>Line can&apos;t be inserted! Layer is not editable!</source>
+        <translation>Линия не может быть вставлена! Слой не в режиме редактирования!</translation>
+    </message>
+    <message>
+        <location filename="reconstruct_line.py" line="258"/>
+        <source>Line can&apos;t be inserted! Copy points first!</source>
+        <translation>Линия не может быть вставлена! Сначала скопируйте точки!</translation>
     </message>
 </context>
 </TS>
