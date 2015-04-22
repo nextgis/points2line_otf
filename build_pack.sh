@@ -18,8 +18,8 @@ cp -R ./src/* $BUILD_DIR/$PLUGIN_NAME
 
 #Clean
 rm $BUILD_DIR/$PLUGIN_NAME/*.pyc
-rm -R $BUILD_DIR/$PLUGIN_NAME/test &&
-rm -R $BUILD_DIR/$PLUGIN_NAME/help &&
+rm -R $BUILD_DIR/$PLUGIN_NAME/test
+rm -R $BUILD_DIR/$PLUGIN_NAME/help
 
 #Get version
 cd $BUILD_DIR
