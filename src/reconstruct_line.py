@@ -174,13 +174,6 @@ class ReconstructLine:
             callback=self.insert_line,
             parent=self.iface.mainWindow())
 
-        self.check_buttons_state()
-
-        # Add global signals
-        QObject.connect(self.iface, SIGNAL('currentLayerChanged(QgsMapLayer *)'), self.check_buttons_state)
-        QObject.connect(self.iface.mapCanvas(), SIGNAL('selectionChanged(QgsMapLayer *)'), self.check_buttons_state)
-        QObject.connect(self.iface.actionToggleEditing(), SIGNAL('triggered()'), self.check_buttons_state)
-
         # import pydevd
         # pydevd.settrace('localhost', port=9922, stdoutToServer=True, stderrToServer=True, suspend=False)
 
@@ -220,28 +213,25 @@ class ReconstructLine:
 
     def copy_points(self):
         layer = self.iface.activeLayer()
-        if not isinstance(layer, QgsVectorLayer):
-            QMessageBox.information(None, self.tr('Points was not copied'),
-                                    self.tr('Select any vector layer and feature!'))
-            return
+        if not isinstance(layer, QgsVectorLayer) or layer.geometryType() != QGis.Point:
+            self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
+                                            self.tr("No points! Choose point layer and select points!"),
+                                            level=QgsMessageBar.WARNING,
+                                            duration=5)
 
-        if layer.geometryType() != QGis.Point:
-            QMessageBox.information(None, self.tr('Points was not copied'),
-                                    self.tr('Only point vector layers are supported!'))
             return
 
         if layer.selectedFeatureCount() < 2:
-            QMessageBox.information(None, self.tr('Points was not copied'),
-                                    self.tr('Select two or more points!'))
+            self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
+                                            self.tr("No points! Select two or more points in the layer!"),
+                                            level=QgsMessageBar.WARNING,
+                                            duration=5)
             return
 
-        self._geom_buffer = []
-        for feature in layer.selectedFeatures():
-            self._geom_buffer.append(feature.geometry().vertexAt(0))
+        self._geom_buffer = [feature.geometry().vertexAt(0) for feature in layer.selectedFeatures()]
 
         self._srid = layer.crs()
 
-        self.check_buttons_state()
         self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
                                             self.tr("Total points was copied: %d. Use 'Insert line' button on new or existing line layer to make a line.") % len(self._geom_buffer),
                                             level=QgsMessageBar.INFO,
@@ -250,19 +240,25 @@ class ReconstructLine:
 
     def insert_line(self):
         layer = self.iface.activeLayer()
-        if not isinstance(layer, QgsVectorLayer):
-            QMessageBox.information(None, self.tr('Line can\'t be inserted'),
-                                    self.tr('Select any vector layer and feature for inserting geom!'))
+        if not isinstance(layer, QgsVectorLayer) or layer.geometryType() != QGis.Line:
+            self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
+                                    self.tr("Line can\'t be inserted! Select lines layer for inserting new geom!"),
+                                    level=QgsMessageBar.WARNING,
+                                    duration=5)
             return
-        if layer.geometryType() != QGis.Line:
-            QMessageBox.information(None, self.tr('Line can\'t be inserted'),
-                                    self.tr('Only line vector layers are supported!'))
-            return
+
         if not layer.isEditable():
-            QMessageBox.critical(None, self.tr('Line can\'t be inserted'), self.tr('Layer is not editable!'))
+            self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
+                                    self.tr("Line can\'t be inserted! Layer is not editable!"),
+                                    level=QgsMessageBar.WARNING,
+                                    duration=5)
             return
+
         if not self._geom_buffer:
-            QMessageBox.information(None, self.tr('Line can\'t be inserted'), self.tr('Buffer is empty!'))
+            self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
+                        self.tr("Line can\'t be inserted! Copy points first!"),
+                        level=QgsMessageBar.WARNING,
+                        duration=5)
             return
 
         #show message
@@ -280,18 +276,15 @@ class ReconstructLine:
             # Create line
 
             # QGS geoms to np
-            points = []
-            for in_geom in self._geom_buffer:
-                points.append((in_geom.x(), in_geom.y()))
+            points = [(in_geom.x(), in_geom.y()) for in_geom in self._geom_buffer]
             data = np.array(points)
+
             # Make line
             som = SOM1d(data)
             result = som.connect()
 
             #np to QGS
-            self._geom_buffer = []
-            for out_geom in result:
-                self._geom_buffer.append(QgsPoint(out_geom[0], out_geom[1]))
+            self._geom_buffer = [QgsPoint(out_geom[0], out_geom[1]) for out_geom in result]
 
             if layer.wkbType() == QGis.WKBMultiLineString:
                 geom = QgsGeometry.fromMultiPolyline([self._geom_buffer])
