@@ -243,7 +243,7 @@ class ReconstructLine:
 
         self.check_buttons_state()
         self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
-                                            self.tr("Total points was copied: ") + str(len(self._geom_buffer)),
+                                            self.tr("Total points was copied: %d. Use 'Insert line' button on new or existing line layer to make a line.") % len(self._geom_buffer),
                                             level=QgsMessageBar.INFO,
                                             duration=5)
 
