@@ -9,7 +9,8 @@
 [general]
 name=ReconstructLine
 qgisMinimumVersion=2.6
-description=QGIS tool to reconstruct linear features from points. Points can be unordered (mixed) time-wise, only spatial location of points is considered.
+description=QGIS tool to reconstruct linear features from points.
+about=QGIS tool to reconstruct linear features from points. Points can be unordered (mixed) time-wise, only spatial location of points is considered. This is NOT simple 'connect the dots as they are in the table' mechanism (for that - check Points2One plugin.
 version=0.4
 author=NextGIS
 
