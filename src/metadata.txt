@@ -9,7 +9,7 @@
 [general]
 name=ReconstructLine
 qgisMinimumVersion=2.6
-description=QGIS tool to reconstruct linear features from points
+description=QGIS tool to reconstruct linear features from points. Points can be unordered time-wise, only spatial location of points is considered.
 version=0.4
 author=NextGIS
 
