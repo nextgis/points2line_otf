@@ -28,6 +28,7 @@ import os.path
 from qgis.core import QgsVectorLayer, QGis, QgsGeometry, QgsFeature, QgsPoint, QgsApplication, QgsCoordinateTransform
 from qgis.gui import QgsMessageBar, QgsAttributeDialog
 from .connector import SOM1d
+from .mst import MST
 
 
 CURR_PATH = os.path.dirname(__file__)
@@ -280,39 +281,50 @@ class ReconstructLine:
             data = np.array(points)
 
             # Make line
-            som = SOM1d(data)
-            result = som.connect()
+            # som = SOM1d(data)
+            # result = som.connect()
+            conn  = MST(data)
+            result = conn.connect()
 
             #np to QGS
-            self._geom_buffer = [QgsPoint(out_geom[0], out_geom[1]) for out_geom in result]
+            lines = []
+            for line in result:
+                lines.append([QgsPoint(out_geom[0], out_geom[1]) for out_geom in line])
 
+            geom_list = []
             if layer.wkbType() == QGis.WKBMultiLineString:
-                geom = QgsGeometry.fromMultiPolyline([self._geom_buffer])
+                geom_list.append(QgsGeometry.fromMultiPolyline(lines))
             else:
-                geom = QgsGeometry.fromPolyline(self._geom_buffer)
+                for line in lines:
+                    geom_list.append(QgsGeometry.fromPolyline(line))
 
             # Check crs and reproject
             target_crs = layer.crs()
             if target_crs.srsid() != self._srid.srsid():
                 transf = QgsCoordinateTransform(self._srid, target_crs)
-                geom.transform(transf)
+                for geom in geom_list:
+                    geom.transform(transf)
 
-            # Insert feature
-            feat = QgsFeature()
-            feat.setFields(layer.dataProvider().fields())
-            feat.setGeometry(geom)
+            # Insert feature(s)
+            features = []
+            for geom in geom_list:
+                feat = QgsFeature()
+                feat.setFields(layer.dataProvider().fields())
+                feat.setGeometry(geom)
+                features.append(feat)
 
-            suppressForm = QSettings().value("/qgis/digitizing/disable_enter_attribute_values_dialog", type=bool, defaultValue=False)
+            suppressForm = QSettings().value("/qgis/digitizing/disable_enter_attribute_values_dialog", type=bool, defaultValue=True)
 
             if suppressForm:
                 # quite insert feature
-                result = layer.addFeatures([feat])
+                result = layer.addFeatures(features)
             else:
                 # show dialog
                 QgsApplication.restoreOverrideCursor()
-                attrDialog = QgsAttributeDialog(layer, feat, False)
-                attrDialog.setIsAddDialog(True)
-                result = attrDialog.exec_()
+                for feat in features:
+                    attrDialog = QgsAttributeDialog(layer, feat, False)
+                    attrDialog.setIsAddDialog(True)
+                    result = attrDialog.exec_()
 
             # show message
             self.iface.messageBar().clearWidgets()

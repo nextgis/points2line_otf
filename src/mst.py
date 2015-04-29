@@ -35,10 +35,14 @@ class MST():
             visited.append(new_edge[1])
             self.dists[visited, new_edge[1]] = np.inf
             self.dists[new_edge[1], visited] = np.inf
-            print edges
-            print self.dists
 
-        return edges
+        result = []
+        for (v1, v2) in edges:
+            x1, y1 = self.data[v1][0], self.data[v1][1]
+            x2, y2 = self.data[v2][0], self.data[v2][1]
+            result.append([[x1, y1], [x2, y2]])
+
+        return result
 
 
 
@@ -60,16 +64,16 @@ if __name__ == "__main__":
     ])
     conn  = MST(data)
     result = conn.connect()
-    print result
 
-    import matplotlib.pyplot as plt
-    from matplotlib import collections  as mc
-    plt.plot(conn.data[:,0], conn.data[:,1], 'o')
-        # som.w.real, som.w.imag, 'r-o',
-    for (v1, v2) in result:
-        print v1, v2
-        x1, y1 = conn.data[v1][0], conn.data[v1][1]
-        x2, y2 = conn.data[v2][0], conn.data[v2][1]
-        print x1,y1, '=>', x2, y2
-        plt.plot([x1, x2], [y1, y2], '-g')
-    plt.show()
+    #~ import matplotlib.pyplot as plt
+    #~ from matplotlib import collections  as mc
+    #~ plt.plot(conn.data[:,0], conn.data[:,1], 'o')
+        #~ # som.w.real, som.w.imag, 'r-o',
+    #~ for line in result:
+        #~ print line
+        #~ v1, v2 = line[0], line[1]
+        #~ x1, y1 = v1[0], v1[1]
+        #~ x2, y2 = v2[0], v2[1]
+        #~ print x1,y1, '=>', x2, y2
+        #~ plt.plot([x1, x2], [y1, y2], '-g')
+    #~ plt.show()
