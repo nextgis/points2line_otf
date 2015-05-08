@@ -28,6 +28,7 @@ import os.path
 from qgis.core import QgsVectorLayer, QGis, QgsGeometry, QgsFeature, QgsPoint, QgsApplication, QgsCoordinateTransform
 from qgis.gui import QgsMessageBar, QgsAttributeDialog
 from .connector import SOM1d
+from .mst import MST
 
 
 CURR_PATH = os.path.dirname(__file__)
@@ -159,6 +160,7 @@ class ReconstructLine:
 
         icon_path_copy = os.path.join(CURR_PATH, 'copy_points.png')
         icon_path_save = os.path.join(CURR_PATH, 'save_line.png')
+        icon_path_method = os.path.join(CURR_PATH, 'save_mult_lines.png')
 
         self._geom_buffer = None
 
@@ -168,10 +170,16 @@ class ReconstructLine:
             callback=self.copy_points,
             parent=self.iface.mainWindow())
 
-        self.insert_action = self.add_action(
+        self.insert_one_action = self.add_action(
             icon_path_save,
             text=self.tr(u'Insert line'),
-            callback=self.insert_line,
+            callback=self.insert_one_line,
+            parent=self.iface.mainWindow())
+
+        self.insert_mult_action = self.add_action(
+            icon_path_method,
+            text=self.tr(u'Insert multiple lines'),
+            callback=self.insert_mult_lines,
             parent=self.iface.mainWindow())
 
         # import pydevd
@@ -195,7 +203,8 @@ class ReconstructLine:
 
         if not isinstance(layer, QgsVectorLayer):
             self.copy_action.setDisabled(True)
-            self.insert_action.setDisabled(True)
+            self.insert_one_action.setDisabled(True)
+            self.insert_mult_action.setDisabled(True)
             return
 
         sel_feat_count = layer.selectedFeatureCount()
@@ -207,9 +216,11 @@ class ReconstructLine:
             self.copy_action.setEnabled(True)
 
         if not layer.isEditable() or geom_type != QGis.Line or not self._geom_buffer:
-            self.insert_action.setDisabled(True)
+            self.insert_one_action.setDisabled(True)
+            self.insert_mult_action.setDisabled(True)
         else:
-            self.insert_action.setEnabled(True)
+            self.insert_one_action.setEnabled(True)
+            self.insert_mult_action.setEnabled(True)
 
     def copy_points(self):
         layer = self.iface.activeLayer()
@@ -237,8 +248,13 @@ class ReconstructLine:
                                             level=QgsMessageBar.INFO,
                                             duration=5)
 
+    def insert_one_line(self):
+        self.insert_line('SOM')
 
-    def insert_line(self):
+    def insert_mult_lines(self):
+        self.insert_line('MST')
+
+    def insert_line(self, method):
         layer = self.iface.activeLayer()
         if not isinstance(layer, QgsVectorLayer) or layer.geometryType() != QGis.Line:
             self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
@@ -280,45 +296,62 @@ class ReconstructLine:
             data = np.array(points)
 
             # Make line
-            som = SOM1d(data)
-            result = som.connect()
+
+            if method == 'MST':
+                conn  = MST(data)
+                result = conn.connect()
+            elif method == 'SOM':
+                som = SOM1d(data)
+                result = som.connect()
+            else:
+                raise ValueError
 
             #np to QGS
-            self._geom_buffer = [QgsPoint(out_geom[0], out_geom[1]) for out_geom in result]
+            lines = []
+            for line in result:
+                lines.append([QgsPoint(out_geom[0], out_geom[1]) for out_geom in line])
 
+            geom_list = []
             if layer.wkbType() == QGis.WKBMultiLineString:
-                geom = QgsGeometry.fromMultiPolyline([self._geom_buffer])
+                geom_list.append(QgsGeometry.fromMultiPolyline(lines))
             else:
-                geom = QgsGeometry.fromPolyline(self._geom_buffer)
+                for line in lines:
+                    geom_list.append(QgsGeometry.fromPolyline(line))
 
             # Check crs and reproject
             target_crs = layer.crs()
             if target_crs.srsid() != self._srid.srsid():
                 transf = QgsCoordinateTransform(self._srid, target_crs)
-                geom.transform(transf)
+                for geom in geom_list:
+                    geom.transform(transf)
 
-            # Insert feature
-            feat = QgsFeature()
-            feat.setFields(layer.dataProvider().fields())
-            feat.setGeometry(geom)
+            # Insert feature(s)
+            features = []
+            for geom in geom_list:
+                feat = QgsFeature()
+                feat.setFields(layer.dataProvider().fields())
+                feat.setGeometry(geom)
+                features.append(feat)
 
-            suppressForm = QSettings().value("/qgis/digitizing/disable_enter_attribute_values_dialog", type=bool, defaultValue=False)
+            default_suppress = (method == 'MST')
+            suppressForm = QSettings().value("/qgis/digitizing/disable_enter_attribute_values_dialog", type=bool, defaultValue=default_suppress)
 
             if suppressForm:
                 # quite insert feature
-                result = layer.addFeatures([feat])
+                result = layer.addFeatures(features)
             else:
                 # show dialog
                 QgsApplication.restoreOverrideCursor()
-                attrDialog = QgsAttributeDialog(layer, feat, False)
-                attrDialog.setIsAddDialog(True)
-                result = attrDialog.exec_()
+                for feat in features:
+                    attrDialog = QgsAttributeDialog(layer, feat, False)
+                    attrDialog.setIsAddDialog(True)
+                    result = attrDialog.exec_()
 
             # show message
             self.iface.messageBar().clearWidgets()
             if result:
                 self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
-                                                self.tr("One line was sucesfull added"),
+                                                self.tr("%s line segment(s) was sucesfull added" % (len(features))),
                                                 level=QgsMessageBar.INFO)
             else:
                 self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),

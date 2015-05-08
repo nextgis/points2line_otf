@@ -4,7 +4,7 @@
  ReconstructLine
  QGIS tool to reconstruct linear features from points
 
-The main idea of the processing is to constrict Hamiltonian path.
+The main idea of the processing is to construct Hamiltonian path.
 
 To do it we use 1-d Self Organising Map. It allows:
   order data points
@@ -142,7 +142,7 @@ class SOM1d():
         result = np.take(self.z, order)
         result = np.array([[z.real, z.imag] for z in result])
 
-        return result
+        return [result]
 
 
 if __name__ == "__main__":
@@ -242,8 +242,11 @@ if __name__ == "__main__":
         [34.748547021,52.704327973],
     ])
 
-    som = SOM1d(data1)
+    som = SOM1d(data2)
     result = som.connect()
+    for l in result:
+        print 'l', l
+    result = result[0]
 
     #~ import matplotlib.pyplot as plt
     #~ plt.plot(som.z.real, som.z.imag, 'o',
