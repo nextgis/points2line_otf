@@ -68,7 +68,6 @@ class ReconstructLine:
         # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(u'ReconstructLine')
         self.toolbar.setObjectName(u'ReconstructLine')
-        self.point_connection_method = 'SOM'    # SOM or MST
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -96,8 +95,7 @@ class ReconstructLine:
         add_to_toolbar=True,
         status_tip=None,
         whats_this=None,
-        parent=None,
-        checkable_flag=False):
+        parent=None):
         """Add a toolbar icon to the toolbar.
 
         :param icon_path: Path to the icon for this action. Can be a resource
@@ -132,10 +130,6 @@ class ReconstructLine:
         :param whats_this: Optional text to show in the status bar when the
             mouse pointer hovers over the action.
 
-        :param checkable_flag: A flag indicating if the action should be
-            checkable. Defaults to False.
-        :type enabled_flag: bool
-
         :returns: The action that was created. Note that the action is also
             added to self.actions list.
         :rtype: QAction
@@ -145,7 +139,6 @@ class ReconstructLine:
         action = QAction(icon, text, parent)
         action.triggered.connect(callback)
         action.setEnabled(enabled_flag)
-        action.setCheckable(checkable_flag)
 
         if status_tip is not None:
             action.setStatusTip(status_tip)
@@ -167,7 +160,7 @@ class ReconstructLine:
 
         icon_path_copy = os.path.join(CURR_PATH, 'copy_points.png')
         icon_path_save = os.path.join(CURR_PATH, 'save_line.png')
-        icon_path_method = os.path.join(CURR_PATH, 'method.png')
+        icon_path_method = os.path.join(CURR_PATH, 'save_mult_lines.png')
 
         self._geom_buffer = None
 
@@ -177,18 +170,17 @@ class ReconstructLine:
             callback=self.copy_points,
             parent=self.iface.mainWindow())
 
-        self.insert_action = self.add_action(
+        self.insert_one_action = self.add_action(
             icon_path_save,
             text=self.tr(u'Insert line'),
-            callback=self.insert_line,
+            callback=self.insert_one_line,
             parent=self.iface.mainWindow())
 
-        self.method_action = self.add_action(
+        self.insert_mult_action = self.add_action(
             icon_path_method,
-            text=self.tr(u'Allow multiple lines'),
-            callback=self.activate_method,
-            parent=self.iface.mainWindow(),
-            checkable_flag=True)
+            text=self.tr(u'Insert multiple lines'),
+            callback=self.insert_mult_lines,
+            parent=self.iface.mainWindow())
 
         # import pydevd
         # pydevd.settrace('localhost', port=9922, stdoutToServer=True, stderrToServer=True, suspend=False)
@@ -211,7 +203,8 @@ class ReconstructLine:
 
         if not isinstance(layer, QgsVectorLayer):
             self.copy_action.setDisabled(True)
-            self.insert_action.setDisabled(True)
+            self.insert_one_action.setDisabled(True)
+            self.insert_mult_action.setDisabled(True)
             return
 
         sel_feat_count = layer.selectedFeatureCount()
@@ -223,9 +216,11 @@ class ReconstructLine:
             self.copy_action.setEnabled(True)
 
         if not layer.isEditable() or geom_type != QGis.Line or not self._geom_buffer:
-            self.insert_action.setDisabled(True)
+            self.insert_one_action.setDisabled(True)
+            self.insert_mult_action.setDisabled(True)
         else:
-            self.insert_action.setEnabled(True)
+            self.insert_one_action.setEnabled(True)
+            self.insert_mult_action.setEnabled(True)
 
     def copy_points(self):
         layer = self.iface.activeLayer()
@@ -253,13 +248,13 @@ class ReconstructLine:
                                             level=QgsMessageBar.INFO,
                                             duration=5)
 
-    def activate_method(self):
-        if self.method_action.isChecked():
-            self.point_connection_method = 'MST'
-        else:
-            self.point_connection_method = 'SOM'
+    def insert_one_line(self):
+        self.insert_line('SOM')
 
-    def insert_line(self):
+    def insert_mult_lines(self):
+        self.insert_line('MST')
+
+    def insert_line(self, method):
         layer = self.iface.activeLayer()
         if not isinstance(layer, QgsVectorLayer) or layer.geometryType() != QGis.Line:
             self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
@@ -302,12 +297,14 @@ class ReconstructLine:
 
             # Make line
 
-            if self.point_connection_method == 'MST':
+            if method == 'MST':
                 conn  = MST(data)
                 result = conn.connect()
-            else:
+            elif method == 'SOM':
                 som = SOM1d(data)
                 result = som.connect()
+            else:
+                raise ValueError
 
             #np to QGS
             lines = []
@@ -336,7 +333,7 @@ class ReconstructLine:
                 feat.setGeometry(geom)
                 features.append(feat)
 
-            default_suppress = self.point_connection_method == 'MST'
+            default_suppress = (method == 'MST')
             suppressForm = QSettings().value("/qgis/digitizing/disable_enter_attribute_values_dialog", type=bool, defaultValue=default_suppress)
 
             if suppressForm:
@@ -354,7 +351,7 @@ class ReconstructLine:
             self.iface.messageBar().clearWidgets()
             if result:
                 self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
-                                                self.tr("One line was sucesfull added"),
+                                                self.tr("%s line segment(s) was sucesfull added" % (len(features))),
                                                 level=QgsMessageBar.INFO)
             else:
                 self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
