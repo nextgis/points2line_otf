@@ -70,15 +70,15 @@ if __name__ == "__main__":
     conn  = MST(data)
     result = conn.connect()
 
-    import matplotlib.pyplot as plt
-    from matplotlib import collections  as mc
-    plt.plot(conn.data[:,0], conn.data[:,1], 'o')
-        # som.w.real, som.w.imag, 'r-o',
-    for line in result:
-        print line
-        v1, v2 = line[0], line[1]
-        x1, y1 = v1[0], v1[1]
-        x2, y2 = v2[0], v2[1]
-        print x1,y1, '=>', x2, y2
-        plt.plot([x1, x2], [y1, y2], '-g')
-    plt.show()
+    #~ import matplotlib.pyplot as plt
+    #~ from matplotlib import collections  as mc
+    #~ plt.plot(conn.data[:,0], conn.data[:,1], 'o')
+        #~ # som.w.real, som.w.imag, 'r-o',
+    #~ for line in result:
+        #~ print line
+        #~ v1, v2 = line[0], line[1]
+        #~ x1, y1 = v1[0], v1[1]
+        #~ x2, y2 = v2[0], v2[1]
+        #~ print x1,y1, '=>', x2, y2
+        #~ plt.plot([x1, x2], [y1, y2], '-g')
+    #~ plt.show()
