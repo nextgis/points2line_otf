@@ -5,8 +5,10 @@ Construct minimum spanning tree using Prim's algorithm.
 '''
 
 import numpy as np
-from scipy.spatial.distance import pdist, squareform
 
+def dist(x, y):
+    assert len(x) == len(y)
+    return np.sqrt(sum((x - y)**2))
 
 class MST():
     '''1-d self organizing map for 2-dimmential inputs
@@ -19,9 +21,12 @@ class MST():
         self._set_dists()
 
     def _set_dists(self):
-        self.dists = squareform(
-            pdist(self.data)
-        )
+        self.dists = np.zeros((self.size, self.size))
+        for i in range(self.size):
+            for j in range(i, self.size):
+                self.dists[i, j] = self.dists[j, i] = \
+                    dist(self.data[i], self.data[j])
+
         diag_indices = np.arange(self.size)
         self.dists[diag_indices, diag_indices] = np.inf
 
@@ -65,15 +70,15 @@ if __name__ == "__main__":
     conn  = MST(data)
     result = conn.connect()
 
-    #~ import matplotlib.pyplot as plt
-    #~ from matplotlib import collections  as mc
-    #~ plt.plot(conn.data[:,0], conn.data[:,1], 'o')
-        #~ # som.w.real, som.w.imag, 'r-o',
-    #~ for line in result:
-        #~ print line
-        #~ v1, v2 = line[0], line[1]
-        #~ x1, y1 = v1[0], v1[1]
-        #~ x2, y2 = v2[0], v2[1]
-        #~ print x1,y1, '=>', x2, y2
-        #~ plt.plot([x1, x2], [y1, y2], '-g')
-    #~ plt.show()
+    import matplotlib.pyplot as plt
+    from matplotlib import collections  as mc
+    plt.plot(conn.data[:,0], conn.data[:,1], 'o')
+        # som.w.real, som.w.imag, 'r-o',
+    for line in result:
+        print line
+        v1, v2 = line[0], line[1]
+        x1, y1 = v1[0], v1[1]
+        x2, y2 = v2[0], v2[1]
+        print x1,y1, '=>', x2, y2
+        plt.plot([x1, x2], [y1, y2], '-g')
+    plt.show()
