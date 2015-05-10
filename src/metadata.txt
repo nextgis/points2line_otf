@@ -21,7 +21,9 @@ email=info@nextgis.com
 # Recommended items:
 
 # Uncomment the following line and add your changelog:
-changelog= 0.5:
+changelog= 0.6
+        * Add new connecting method (based on Minimum Spanning Tree)
+    0.5:
         * Update metadata
     0.4:
         * GUI Changes
