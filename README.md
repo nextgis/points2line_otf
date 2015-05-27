@@ -9,5 +9,5 @@ Video demo: https://www.youtube.com/watch?v=qDM3bZNAf7Y
 
 Manuals:
 
-* RU: 
-* EN: 
+* RU: http://gis-lab.info/qa/reconstruct_line.html
+* EN: https://translate.google.com/translate?sl=ru&tl=en&js=y&prev=_t&hl=ru&ie=UTF-8&u=http%3A%2F%2Fgis-lab.info%2Fqa%2Freconstruct_line.html&edit-text=
