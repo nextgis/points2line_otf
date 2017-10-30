@@ -47,7 +47,7 @@ class SOM1d():
         self.y_std = np.std(data[:, 1], axis=0)
 
         ratio = 4.0/3.0     # (Number of SOM unit) / (Number of points)
-        self.w = np.zeros(data.shape[0]*ratio, dtype=np.complex)
+        self.w = np.zeros(int(data.shape[0]*ratio), dtype=np.complex)
 
 
     @property
