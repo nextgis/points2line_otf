@@ -315,10 +315,11 @@ class ReconstructLine(object):
 
             geom_list = []
             if layer.wkbType() == QgsWkbTypes.MultiLineString:
-                geom_list.append(QgsGeometry.fromMultiPolylineXY(lines))
-            else:
                 for line in lines:
                     geom_list.append(QgsGeometry.fromPolylineXY(line))
+
+            else:
+                geom_list.append(QgsGeometry.fromMultiPolylineXY(lines))
 
             # Check crs and reproject
             target_crs = layer.crs()
