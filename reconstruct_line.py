@@ -20,20 +20,22 @@
  *                                                                         *
  ***************************************************************************/
 """
+from builtins import object
 import numpy as np
-from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, QObject, SIGNAL, Qt
-from PyQt4.QtGui import QAction, QIcon, QMessageBox
+from qgis.PyQt.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, QObject, Qt
+from qgis.PyQt.QtWidgets import QAction, QMessageBox
+from qgis.PyQt.QtGui import QIcon
 # Import the code for the dialog
 import os.path
-from qgis.core import QgsVectorLayer, QGis, QgsGeometry, QgsFeature, QgsPoint, QgsApplication, QgsCoordinateTransform
-from qgis.gui import QgsMessageBar, QgsAttributeDialog
+from qgis.core import *
+from qgis.gui import *
 from .connector import SOM1d
 from .mst import MST
 
 
 CURR_PATH = os.path.dirname(__file__)
 
-class ReconstructLine:
+class ReconstructLine(object):
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface):
@@ -210,12 +212,12 @@ class ReconstructLine:
         sel_feat_count = layer.selectedFeatureCount()
         geom_type = layer.geometryType()
 
-        if sel_feat_count < 2 or geom_type != QGis.Point:
+        if sel_feat_count < 2 or geom_type != QgsWkbTypes.PointGeometry:
             self.copy_action.setDisabled(True)
         else:
             self.copy_action.setEnabled(True)
 
-        if not layer.isEditable() or geom_type != QGis.Line or not self._geom_buffer:
+        if not layer.isEditable() or geom_type != QgsWkbTypes.LineGeometry or not self._geom_buffer:
             self.insert_one_action.setDisabled(True)
             self.insert_mult_action.setDisabled(True)
         else:
@@ -224,10 +226,10 @@ class ReconstructLine:
 
     def copy_points(self):
         layer = self.iface.activeLayer()
-        if not isinstance(layer, QgsVectorLayer) or layer.geometryType() != QGis.Point:
+        if not isinstance(layer, QgsVectorLayer) or layer.geometryType() != QgsWkbTypes.PointGeometry:
             self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
                                             self.tr("No points! Choose point layer and select points!"),
-                                            level=QgsMessageBar.WARNING,
+                                            level=Qgis.Warning,
                                             duration=5)
 
             return
@@ -235,7 +237,7 @@ class ReconstructLine:
         if layer.selectedFeatureCount() < 2:
             self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
                                             self.tr("No points! Select two or more points in the layer!"),
-                                            level=QgsMessageBar.WARNING,
+                                            level=Qgis.Warning,
                                             duration=5)
             return
 
@@ -245,7 +247,7 @@ class ReconstructLine:
 
         self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
                                             self.tr("Total points was copied: %d. Use 'Insert line' button on new or existing line layer to make a line.") % len(self._geom_buffer),
-                                            level=QgsMessageBar.INFO,
+                                            level=Qgis.Info,
                                             duration=5)
 
     def insert_one_line(self):
@@ -256,24 +258,24 @@ class ReconstructLine:
 
     def insert_line(self, method):
         layer = self.iface.activeLayer()
-        if not isinstance(layer, QgsVectorLayer) or layer.geometryType() != QGis.Line:
+        if not isinstance(layer, QgsVectorLayer) or layer.geometryType() != QgsWkbTypes.LineGeometry:
             self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
                                     self.tr("Line can\'t be inserted! Select lines layer for inserting new geom!"),
-                                    level=QgsMessageBar.WARNING,
+                                    level=Qgis.Warning,
                                     duration=5)
             return
 
         if not layer.isEditable():
             self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
                                     self.tr("Line can\'t be inserted! Layer is not editable!"),
-                                    level=QgsMessageBar.WARNING,
+                                    level=Qgis.Warning,
                                     duration=5)
             return
 
         if not self._geom_buffer:
             self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
                         self.tr("Line can\'t be inserted! Copy points first!"),
-                        level=QgsMessageBar.WARNING,
+                        level=Qgis.Warning,
                         duration=5)
             return
 
@@ -281,7 +283,7 @@ class ReconstructLine:
         self.iface.messageBar().clearWidgets()
         self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
                                             self.tr("Processing points. Please wait..."),
-                                            level=QgsMessageBar.INFO
+                                            level=Qgis.Info
                                             )
         QgsApplication.setOverrideCursor(Qt.WaitCursor)
         QgsApplication.processEvents()
@@ -309,19 +311,20 @@ class ReconstructLine:
             #np to QGS
             lines = []
             for line in result:
-                lines.append([QgsPoint(out_geom[0], out_geom[1]) for out_geom in line])
+                lines.append([QgsPointXY(out_geom[0], out_geom[1]) for out_geom in line])
 
             geom_list = []
-            if layer.wkbType() == QGis.WKBMultiLineString:
-                geom_list.append(QgsGeometry.fromMultiPolyline(lines))
-            else:
+            if layer.wkbType() == QgsWkbTypes.MultiLineString:
                 for line in lines:
-                    geom_list.append(QgsGeometry.fromPolyline(line))
+                    geom_list.append(QgsGeometry.fromPolylineXY(line))
+
+            else:
+                geom_list.append(QgsGeometry.fromMultiPolylineXY(lines))
 
             # Check crs and reproject
             target_crs = layer.crs()
             if target_crs.srsid() != self._srid.srsid():
-                transf = QgsCoordinateTransform(self._srid, target_crs)
+                transf = QgsCoordinateTransform(self._srid, target_crs, QgsProject.instance())
                 for geom in geom_list:
                     geom.transform(transf)
 
@@ -344,7 +347,7 @@ class ReconstructLine:
                 QgsApplication.restoreOverrideCursor()
                 for feat in features:
                     attrDialog = QgsAttributeDialog(layer, feat, False)
-                    attrDialog.setIsAddDialog(True)
+                    attrDialog.setMode(True)
                     result = attrDialog.exec_()
 
             # show message
@@ -352,11 +355,11 @@ class ReconstructLine:
             if result:
                 self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
                                                 self.tr("%s line segment(s) was sucesfull added" % (len(features))),
-                                                level=QgsMessageBar.INFO)
+                                                level=Qgis.Info)
             else:
                 self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
                                                 self.tr("Line was not added"),
-                                                level=QgsMessageBar.CRITICAL)
+                                                level=Qgis.Critical)
 
             self.iface.mapCanvas().refresh()
         finally:

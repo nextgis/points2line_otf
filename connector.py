@@ -27,12 +27,16 @@ To do it we use 1-d Self Organising Map. It allows:
  *                                                                         *
  ***************************************************************************/
 """
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import range
+from builtins import object
 import numpy as np
-from tuner import Tuner
+from .tuner import Tuner
 
 EPSILON = 0.00001    # A small number
 
-class SOM1d():
+class SOM1d(object):
     '''1-d self organizing map for 2-dimmential inputs
     '''
     def __init__(self, data):
@@ -82,7 +86,7 @@ class SOM1d():
         """ Returns a Gaussian centered in c """
         d = 2*np.pi * sigma**2
 
-        dists = range(self.size)-c
+        dists = list(range(self.size))-c
         ax = np.exp(-np.power(dists, 2)/d)
 
         return ax
@@ -245,7 +249,8 @@ if __name__ == "__main__":
     som = SOM1d(data2)
     result = som.connect()
     for l in result:
-        print 'l', l
+        # fix_print_with_import
+        print('l', l)
     result = result[0]
 
     #~ import matplotlib.pyplot as plt
