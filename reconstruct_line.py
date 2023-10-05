@@ -31,6 +31,7 @@ from qgis.core import *
 from qgis.gui import *
 from .connector import SOM1d
 from .mst import MST
+from . import about_dialog
 
 
 CURR_PATH = os.path.dirname(__file__)
@@ -184,6 +185,13 @@ class ReconstructLine(object):
             callback=self.insert_mult_lines,
             parent=self.iface.mainWindow())
 
+        self.action_about = self.add_action(
+            None,
+            text=self.tr(u'About'),
+            callback=self.about,
+            add_to_toolbar=False,
+            parent=self.iface.mainWindow())
+
         # import pydevd
         # pydevd.settrace('localhost', port=9922, stdoutToServer=True, stderrToServer=True, suspend=False)
 
@@ -196,8 +204,13 @@ class ReconstructLine(object):
                 self.tr(u'&Reconstruct Line'),
                 action)
             self.iface.removeToolBarIcon(action)
+            action.deleteLater()
         # remove the toolbar
         del self.toolbar
+
+    def about(self):
+        dlg = about_dialog.AboutDialog(os.path.basename(self.plugin_dir))
+        dlg.exec_()
 
 
     def check_buttons_state(self, layer=None):
