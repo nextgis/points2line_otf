@@ -30,7 +30,7 @@ class Tuner():
 
 
     def permute(self, index, order):
-        tests = np.empty((self.size, self.size), dtype=np.int)
+        tests = np.empty((self.size, self.size), dtype=np.int_)
         num = order[index]
         base = np.delete(order, index)
 
