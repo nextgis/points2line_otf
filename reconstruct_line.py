@@ -20,11 +20,20 @@
  *                                                                         *
  ***************************************************************************/
 """
+
 from builtins import object
 import numpy as np
-from qgis.PyQt.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, QObject, Qt
+from qgis.PyQt.QtCore import (
+    QSettings,
+    QTranslator,
+    qVersion,
+    QCoreApplication,
+    QObject,
+    Qt,
+)
 from qgis.PyQt.QtWidgets import QAction, QMessageBox
 from qgis.PyQt.QtGui import QIcon
+
 # Import the code for the dialog
 import os.path
 from qgis.core import *
@@ -35,6 +44,7 @@ from . import about_dialog
 
 
 CURR_PATH = os.path.dirname(__file__)
+
 
 class ReconstructLine(object):
     """QGIS Plugin Implementation."""
@@ -52,25 +62,24 @@ class ReconstructLine(object):
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
         # initialize locale
-        locale = QSettings().value('locale/userLocale')[0:2]
+        locale = QSettings().value("locale/userLocale")[0:2]
         locale_path = os.path.join(
-            self.plugin_dir,
-            'i18n',
-            'ReconstructLine_{}.qm'.format(locale))
+            self.plugin_dir, "i18n", "ReconstructLine_{}.qm".format(locale)
+        )
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
             self.translator.load(locale_path)
 
-            if qVersion() > '4.3.3':
+            if qVersion() > "4.3.3":
                 QCoreApplication.installTranslator(self.translator)
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u'&Reconstruct line')
+        self.menu = self.tr("&Reconstruct line")
         # TODO: We are going to let the user set this up in a future iteration
-        self.toolbar = self.iface.addToolBar(u'ReconstructLine')
-        self.toolbar.setObjectName(u'ReconstructLine')
+        self.toolbar = self.iface.addToolBar("ReconstructLine")
+        self.toolbar.setObjectName("ReconstructLine")
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -85,8 +94,7 @@ class ReconstructLine(object):
         :rtype: QString
         """
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
-        return QCoreApplication.translate('ReconstructLine', message)
-
+        return QCoreApplication.translate("ReconstructLine", message)
 
     def add_action(
         self,
@@ -98,7 +106,8 @@ class ReconstructLine(object):
         add_to_toolbar=True,
         status_tip=None,
         whats_this=None,
-        parent=None):
+        parent=None,
+    ):
         """Add a toolbar icon to the toolbar.
 
         :param icon_path: Path to the icon for this action. Can be a resource
@@ -153,56 +162,55 @@ class ReconstructLine(object):
             self.toolbar.addAction(action)
 
         if add_to_menu:
-            self.iface.addPluginToVectorMenu(
-                self.menu,
-                action)
+            self.iface.addPluginToVectorMenu(self.menu, action)
         self.actions.append(action)
         return action
 
     def initGui(self):
-
-        icon_path_copy = os.path.join(CURR_PATH, 'copy_points.png')
-        icon_path_save = os.path.join(CURR_PATH, 'save_line.png')
-        icon_path_method = os.path.join(CURR_PATH, 'save_mult_lines.png')
+        icon_path_copy = os.path.join(CURR_PATH, "copy_points.png")
+        icon_path_save = os.path.join(CURR_PATH, "save_line.png")
+        icon_path_method = os.path.join(CURR_PATH, "save_mult_lines.png")
 
         self._geom_buffer = None
 
         self.copy_action = self.add_action(
             icon_path_copy,
-            text=self.tr(u'Get points'),
+            text=self.tr("Get points"),
             callback=self.copy_points,
-            parent=self.iface.mainWindow())
+            parent=self.iface.mainWindow(),
+        )
 
         self.insert_one_action = self.add_action(
             icon_path_save,
-            text=self.tr(u'Insert line'),
+            text=self.tr("Insert line"),
             callback=self.insert_one_line,
-            parent=self.iface.mainWindow())
+            parent=self.iface.mainWindow(),
+        )
 
         self.insert_mult_action = self.add_action(
             icon_path_method,
-            text=self.tr(u'Insert multiple lines'),
+            text=self.tr("Insert multiple lines"),
             callback=self.insert_mult_lines,
-            parent=self.iface.mainWindow())
+            parent=self.iface.mainWindow(),
+        )
 
         self.action_about = self.add_action(
             None,
-            text=self.tr(u'About'),
+            text=self.tr("About"),
             callback=self.about,
             add_to_toolbar=False,
-            parent=self.iface.mainWindow())
+            parent=self.iface.mainWindow(),
+        )
 
         # import pydevd
         # pydevd.settrace('localhost', port=9922, stdoutToServer=True, stderrToServer=True, suspend=False)
-
-
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
             self.iface.removePluginVectorMenu(
-                self.tr(u'&Reconstruct Line'),
-                action)
+                self.tr("&Reconstruct Line"), action
+            )
             self.iface.removeToolBarIcon(action)
             action.deleteLater()
         # remove the toolbar
@@ -211,7 +219,6 @@ class ReconstructLine(object):
     def about(self):
         dlg = about_dialog.AboutDialog(os.path.basename(self.plugin_dir))
         dlg.exec_()
-
 
     def check_buttons_state(self, layer=None):
         layer = self.iface.activeLayer()
@@ -230,7 +237,11 @@ class ReconstructLine(object):
         else:
             self.copy_action.setEnabled(True)
 
-        if not layer.isEditable() or geom_type != QgsWkbTypes.LineGeometry or not self._geom_buffer:
+        if (
+            not layer.isEditable()
+            or geom_type != QgsWkbTypes.LineGeometry
+            or not self._geom_buffer
+        ):
             self.insert_one_action.setDisabled(True)
             self.insert_mult_action.setDisabled(True)
         else:
@@ -239,65 +250,92 @@ class ReconstructLine(object):
 
     def copy_points(self):
         layer = self.iface.activeLayer()
-        if not isinstance(layer, QgsVectorLayer) or layer.geometryType() != QgsWkbTypes.PointGeometry:
-            self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
-                                            self.tr("No points! Choose point layer and select points!"),
-                                            level=Qgis.Warning,
-                                            duration=5)
+        if (
+            not isinstance(layer, QgsVectorLayer)
+            or layer.geometryType() != QgsWkbTypes.PointGeometry
+        ):
+            self.iface.messageBar().pushMessage(
+                self.tr("ReconstructLine"),
+                self.tr("No points! Choose point layer and select points!"),
+                level=Qgis.Warning,
+                duration=5,
+            )
 
             return
 
         if layer.selectedFeatureCount() < 2:
-            self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
-                                            self.tr("No points! Select two or more points in the layer!"),
-                                            level=Qgis.Warning,
-                                            duration=5)
+            self.iface.messageBar().pushMessage(
+                self.tr("ReconstructLine"),
+                self.tr("No points! Select two or more points in the layer!"),
+                level=Qgis.Warning,
+                duration=5,
+            )
             return
 
-        self._geom_buffer = [feature.geometry().vertexAt(0) for feature in layer.selectedFeatures()]
+        self._geom_buffer = [
+            feature.geometry().vertexAt(0)
+            for feature in layer.selectedFeatures()
+        ]
 
         self._srid = layer.crs()
 
-        self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
-                                            self.tr("Total points was copied: %d. Use 'Insert line' button on new or existing line layer to make a line.") % len(self._geom_buffer),
-                                            level=Qgis.Info,
-                                            duration=5)
+        self.iface.messageBar().pushMessage(
+            self.tr("ReconstructLine"),
+            self.tr(
+                "Total points was copied: %d. Use 'Insert line' button on new or existing line layer to make a line."
+            )
+            % len(self._geom_buffer),
+            level=Qgis.Info,
+            duration=5,
+        )
 
     def insert_one_line(self):
-        self.insert_line('SOM')
+        self.insert_line("SOM")
 
     def insert_mult_lines(self):
-        self.insert_line('MST')
+        self.insert_line("MST")
 
     def insert_line(self, method):
         layer = self.iface.activeLayer()
-        if not isinstance(layer, QgsVectorLayer) or layer.geometryType() != QgsWkbTypes.LineGeometry:
-            self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
-                                    self.tr("Line can\'t be inserted! Select lines layer for inserting new geom!"),
-                                    level=Qgis.Warning,
-                                    duration=5)
+        if (
+            not isinstance(layer, QgsVectorLayer)
+            or layer.geometryType() != QgsWkbTypes.LineGeometry
+        ):
+            self.iface.messageBar().pushMessage(
+                self.tr("ReconstructLine"),
+                self.tr(
+                    "Line can't be inserted! Select lines layer for inserting new geom!"
+                ),
+                level=Qgis.Warning,
+                duration=5,
+            )
             return
 
         if not layer.isEditable():
-            self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
-                                    self.tr("Line can\'t be inserted! Layer is not editable!"),
-                                    level=Qgis.Warning,
-                                    duration=5)
+            self.iface.messageBar().pushMessage(
+                self.tr("ReconstructLine"),
+                self.tr("Line can't be inserted! Layer is not editable!"),
+                level=Qgis.Warning,
+                duration=5,
+            )
             return
 
         if not self._geom_buffer:
-            self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
-                        self.tr("Line can\'t be inserted! Copy points first!"),
-                        level=Qgis.Warning,
-                        duration=5)
+            self.iface.messageBar().pushMessage(
+                self.tr("ReconstructLine"),
+                self.tr("Line can't be inserted! Copy points first!"),
+                level=Qgis.Warning,
+                duration=5,
+            )
             return
 
-        #show message
+        # show message
         self.iface.messageBar().clearWidgets()
-        self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
-                                            self.tr("Processing points. Please wait..."),
-                                            level=Qgis.Info
-                                            )
+        self.iface.messageBar().pushMessage(
+            self.tr("ReconstructLine"),
+            self.tr("Processing points. Please wait..."),
+            level=Qgis.Info,
+        )
         QgsApplication.setOverrideCursor(Qt.WaitCursor)
         QgsApplication.processEvents()
         QgsApplication.processEvents()
@@ -307,24 +345,28 @@ class ReconstructLine(object):
             # Create line
 
             # QGS geoms to np
-            points = [(in_geom.x(), in_geom.y()) for in_geom in self._geom_buffer]
+            points = [
+                (in_geom.x(), in_geom.y()) for in_geom in self._geom_buffer
+            ]
             data = np.array(points)
 
             # Make line
 
-            if method == 'MST':
-                conn  = MST(data)
+            if method == "MST":
+                conn = MST(data)
                 result = conn.connect()
-            elif method == 'SOM':
+            elif method == "SOM":
                 som = SOM1d(data)
                 result = som.connect()
             else:
                 raise ValueError
 
-            #np to QGS
+            # np to QGS
             lines = []
             for line in result:
-                lines.append([QgsPointXY(out_geom[0], out_geom[1]) for out_geom in line])
+                lines.append(
+                    [QgsPointXY(out_geom[0], out_geom[1]) for out_geom in line]
+                )
 
             geom_list = []
             if layer.wkbType() == QgsWkbTypes.MultiLineString:
@@ -337,7 +379,9 @@ class ReconstructLine(object):
             # Check crs and reproject
             target_crs = layer.crs()
             if target_crs.srsid() != self._srid.srsid():
-                transf = QgsCoordinateTransform(self._srid, target_crs, QgsProject.instance())
+                transf = QgsCoordinateTransform(
+                    self._srid, target_crs, QgsProject.instance()
+                )
                 for geom in geom_list:
                     geom.transform(transf)
 
@@ -349,8 +393,12 @@ class ReconstructLine(object):
                 feat.setGeometry(geom)
                 features.append(feat)
 
-            default_suppress = (method == 'MST')
-            suppressForm = QSettings().value("/qgis/digitizing/disable_enter_attribute_values_dialog", type=bool, defaultValue=default_suppress)
+            default_suppress = method == "MST"
+            suppressForm = QSettings().value(
+                "/qgis/digitizing/disable_enter_attribute_values_dialog",
+                type=bool,
+                defaultValue=default_suppress,
+            )
 
             if suppressForm:
                 # quite insert feature
@@ -366,13 +414,20 @@ class ReconstructLine(object):
             # show message
             self.iface.messageBar().clearWidgets()
             if result:
-                self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
-                                                self.tr("%s line segment(s) was sucesfull added" % (len(features))),
-                                                level=Qgis.Info)
+                self.iface.messageBar().pushMessage(
+                    self.tr("ReconstructLine"),
+                    self.tr(
+                        "%s line segment(s) was sucesfull added"
+                        % (len(features))
+                    ),
+                    level=Qgis.Info,
+                )
             else:
-                self.iface.messageBar().pushMessage(self.tr("ReconstructLine"),
-                                                self.tr("Line was not added"),
-                                                level=Qgis.Critical)
+                self.iface.messageBar().pushMessage(
+                    self.tr("ReconstructLine"),
+                    self.tr("Line was not added"),
+                    level=Qgis.Critical,
+                )
 
             self.iface.mapCanvas().refresh()
         finally:

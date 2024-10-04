@@ -3,7 +3,7 @@
 import numpy as np
 
 
-class Tuner():
+class Tuner:
     def __init__(self, data):
         self.data = data
 
@@ -12,11 +12,12 @@ class Tuner():
         return len(self.data)
 
     def penalty(self, order):
-        '''Return sum of distances between units
-        '''
+        """Return sum of distances between units"""
         x1 = np.take(self.data, order)
         x2 = np.roll(x1, 1)
-        d = np.sum(abs(x1 - x2)[1:])  # (x1 - x2)[0] is the distance between the first and the last points
+        d = np.sum(
+            abs(x1 - x2)[1:]
+        )  # (x1 - x2)[0] is the distance between the first and the last points
         return d
 
     def roll_to_max_distance(self, order):
@@ -27,7 +28,6 @@ class Tuner():
         d = abs(x1 - x2)
         idx = np.argmax(d)
         return np.roll(order, -idx)
-
 
     def permute(self, index, order):
         tests = np.empty((self.size, self.size), dtype=np.int)
@@ -40,8 +40,7 @@ class Tuner():
         return tests
 
     def local_opt(self, init_order):
-        '''Reorder some points to find local optimum
-        '''
+        """Reorder some points to find local optimum"""
         best_penalty = self.penalty(init_order)
         best_order = init_order
 
@@ -59,7 +58,6 @@ class Tuner():
         return (best_penalty, best_order)
 
     def reorder(self, init_order):
-
         # List of candidates (good start points) for optimize.
         # Candidate 1: eliminate the biggest distance from the point list
         cand1 = self.roll_to_max_distance(init_order)

@@ -33,4 +33,5 @@ def classFactory(iface):  # pylint: disable=invalid-name
     """
     #
     from .reconstruct_line import ReconstructLine
+
     return ReconstructLine(iface)
