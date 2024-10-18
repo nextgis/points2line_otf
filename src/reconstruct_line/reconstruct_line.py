@@ -218,7 +218,7 @@ class ReconstructLine(object):
 
     def about(self):
         dlg = about_dialog.AboutDialog(os.path.basename(self.plugin_dir))
-        dlg.exec_()
+        dlg.exec()
 
     def check_buttons_state(self, layer=None):
         layer = self.iface.activeLayer()
@@ -409,7 +409,7 @@ class ReconstructLine(object):
                 for feat in features:
                     attrDialog = QgsAttributeDialog(layer, feat, False)
                     attrDialog.setMode(True)
-                    result = attrDialog.exec_()
+                    result = attrDialog.exec()
 
             # show message
             self.iface.messageBar().clearWidgets()
