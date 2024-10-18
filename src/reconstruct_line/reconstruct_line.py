@@ -167,9 +167,9 @@ class ReconstructLine(object):
         return action
 
     def initGui(self):
-        icon_path_copy = os.path.join(CURR_PATH, "copy_points.png")
-        icon_path_save = os.path.join(CURR_PATH, "save_line.png")
-        icon_path_method = os.path.join(CURR_PATH, "save_mult_lines.png")
+        icon_path_copy = os.path.join(CURR_PATH, "icons/copy_points.png")
+        icon_path_save = os.path.join(CURR_PATH, "icons/save_line.png")
+        icon_path_method = os.path.join(CURR_PATH, "icons/save_mult_lines.png")
 
         self._geom_buffer = None
 
