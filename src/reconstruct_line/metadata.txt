@@ -5,12 +5,14 @@ description=Reconstruct linear features from unordered points
 description[ru]=Реконструировать линейные объекты из неупорядоченных точек
 about=Reconstruct linear features from points. Points can be unordered (mixed) time-wise, only spatial location of points is considered. This is NOT a simple 'connect the dots as they are in the table' mechanism (for that – check Points2One plugin). Developed by NextGIS. Any feedback is welcome at https://nextgis.com/contact
 about[ru]=Реконструировать линейные объекты по точкам. Точки могут быть неупорядоченными (смешанными) во времени, учитывается только пространственное расположение точек. Это НЕ простой механизм «соединить точки так, как они есть в таблице» (для этого проверьте плагин Points2One). Разработан компании NextGIS. Любые отзывы приветствуются на https://nextgis.com/contact.
-version=0.7
+version=0.8
 author=NextGIS
 
 email=info@nextgis.com
 
 changelog=
+    0.8
+        * Fix NumPy API errors
     0.7
         * Updated for QGIS 3 (thanks Marco @CEZERT)
     0.6
@@ -33,7 +35,7 @@ homepage=https://github.com/nextgis/ReconstructLine
 tracker=https://github.com/nextgis/ReconstructLine/issues
 repository=https://github.com/nextgis/ReconstructLine
 category=Vector
-icon=save_line.png
+icon=icons/save_line.png
 experimental=False
 deprecated=False
 video=https://youtu.be/fw59AbimSPU

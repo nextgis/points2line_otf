@@ -28,8 +28,6 @@ To do it we use 1-d Self Organising Map. It allows:
  ***************************************************************************/
 """
 
-from __future__ import print_function
-from __future__ import absolute_import
 from builtins import range
 from builtins import object
 import numpy as np
@@ -53,7 +51,7 @@ class SOM1d(object):
         self.y_std = np.std(data[:, 1], axis=0)
 
         ratio = 4.0 / 3.0  # (Number of SOM unit) / (Number of points)
-        self.w = np.zeros(int(data.shape[0] * ratio), dtype=np.complex)
+        self.w = np.zeros(int(data.shape[0] * ratio), dtype=complex)
 
     @property
     def size(self):

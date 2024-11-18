@@ -167,9 +167,9 @@ class ReconstructLine(object):
         return action
 
     def initGui(self):
-        icon_path_copy = os.path.join(CURR_PATH, "copy_points.png")
-        icon_path_save = os.path.join(CURR_PATH, "save_line.png")
-        icon_path_method = os.path.join(CURR_PATH, "save_mult_lines.png")
+        icon_path_copy = os.path.join(CURR_PATH, "icons/copy_points.png")
+        icon_path_save = os.path.join(CURR_PATH, "icons/save_line.png")
+        icon_path_method = os.path.join(CURR_PATH, "icons/save_mult_lines.png")
 
         self._geom_buffer = None
 
@@ -218,7 +218,7 @@ class ReconstructLine(object):
 
     def about(self):
         dlg = about_dialog.AboutDialog(os.path.basename(self.plugin_dir))
-        dlg.exec_()
+        dlg.exec()
 
     def check_buttons_state(self, layer=None):
         layer = self.iface.activeLayer()
@@ -409,7 +409,7 @@ class ReconstructLine(object):
                 for feat in features:
                     attrDialog = QgsAttributeDialog(layer, feat, False)
                     attrDialog.setMode(True)
-                    result = attrDialog.exec_()
+                    result = attrDialog.exec()
 
             # show message
             self.iface.messageBar().clearWidgets()
