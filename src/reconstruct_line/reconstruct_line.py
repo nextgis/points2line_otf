@@ -21,27 +21,27 @@
  ***************************************************************************/
 """
 
-from builtins import object
-import numpy as np
-from qgis.PyQt.QtCore import (
-    QSettings,
-    QTranslator,
-    qVersion,
-    QCoreApplication,
-    QObject,
-    Qt,
-)
-from qgis.PyQt.QtWidgets import QAction, QMessageBox
-from qgis.PyQt.QtGui import QIcon
-
 # Import the code for the dialog
 import os.path
+from builtins import object
+
+import numpy as np
 from qgis.core import *
 from qgis.gui import *
+from qgis.PyQt.QtCore import (
+    QCoreApplication,
+    QObject,
+    QSettings,
+    Qt,
+    QTranslator,
+    qVersion,
+)
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import QAction, QMessageBox
+
+from . import about_dialog
 from .connector import SOM1d
 from .mst import MST
-from . import about_dialog
-
 
 CURR_PATH = os.path.dirname(__file__)
 
@@ -201,6 +201,15 @@ class ReconstructLine(object):
             add_to_toolbar=False,
             parent=self.iface.mainWindow(),
         )
+
+        self.__show_help_action = QAction(
+            QIcon(icon_path_save),
+            "ReconstructLine",
+        )
+        self.__show_help_action.triggered.connect(self.about)
+        plugin_help_menu = self.iface.pluginHelpMenu()
+        assert plugin_help_menu is not None
+        plugin_help_menu.addAction(self.__show_help_action)
 
         # import pydevd
         # pydevd.settrace('localhost', port=9922, stdoutToServer=True, stderrToServer=True, suspend=False)
